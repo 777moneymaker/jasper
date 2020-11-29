@@ -81,3 +81,9 @@ lib64/
 lib64
 example_data/
 pyvenv.cfg
+
+# blast
+*.nhr
+*.nin
+*.nsq
+

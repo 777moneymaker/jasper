@@ -1,5 +1,7 @@
 import argparse
-from jasper import io
+from pathlib import Path
+
+from jasper import  database
 
 
 def parse_args():
@@ -18,6 +20,10 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    print(*io.retrieve(args.virus_dir), sep='\n')
-    print(*io.retrieve(args.host_dir), sep='\n')
+    # args = parse_args()
+    # database.make_local_db("example_data/host/")
+    results = []
+    for i, vir_fl in enumerate(Path('example_data/virus/').iterdir()):
+        res = database.query(str(vir_fl.absolute()))
+        results.append(res)
+    print(*results, sep='\n')
