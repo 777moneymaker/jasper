@@ -1,7 +1,9 @@
 import argparse
 from pathlib import Path
+from multiprocessing import Pool
+from jasper import database
+import time
 
-from jasper import  database
 
 
 def parse_args():
@@ -21,9 +23,13 @@ def parse_args():
 
 if __name__ == "__main__":
     # args = parse_args()
-    # database.make_local_db("example_data/host/")
-    results = []
-    for i, vir_fl in enumerate(Path('example_data/virus/').iterdir()):
-        res = database.query(str(vir_fl.absolute()))
-        results.append(res)
-    print(*results, sep='\n')
+    # database.concat_fasta_files_cmd("")
+
+    db = database.Database("example_data/host", "my_db")
+    print("Quering")
+    start = time.time()
+    with Pool() as p:
+        blast_results = p.map(db.query, list(Path("example_data/virus/").iterdir()))
+    end = time.time()
+    print(*blast_results, sep='\n')
+    print(end - start, len(blast_results))

@@ -15,6 +15,10 @@ class IOTests(unittest.TestCase):
         with self.assertRaises(OSError):
             list(io.retrieve("data/empty_test_dir"))
 
+    def test_perform_check_tools(self):
+        tools = map(io.perform_tool_check, ['blastn'])
+        self.assertEqual(all(tools), True)
+
 
 if __name__ == '__main__':
     unittest.main()
