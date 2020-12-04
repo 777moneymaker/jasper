@@ -5,7 +5,6 @@ from jasper import database
 import time
 
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description="JASPER is a program for bacterial hosts prediction",
                                      epilog="Made by Milosz Chodkowski 2020, PUT Poznan."
@@ -23,13 +22,6 @@ def parse_args():
 
 if __name__ == "__main__":
     # args = parse_args()
-    # database.concat_fasta_files_cmd("")
-
-    db = database.Database("example_data/host", "my_db")
-    print("Quering")
-    start = time.time()
-    with Pool() as p:
-        blast_results = p.map(db.query, list(Path("example_data/virus/").iterdir()))
-    end = time.time()
-    print(*blast_results, sep='\n')
-    print(end - start, len(blast_results))
+    db = database.Database("example_data/host", "my_db", repair_host_files=True)
+    query_df = db.query_multiple("example_data/virus")
+    print(query_df)
