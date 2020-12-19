@@ -29,11 +29,11 @@ class Database:
         self.source_dir = Path(host_path)
         self._repair_host_files = repair_host_files
         self._repair_vir_files = repair_vir_files
-        self._create()
+        # self.create()
 
     @staticmethod
     def _read_fasta(file: Path) -> str:
-        """This function reads single fasta file and returns its conetent.
+        """This function reads single fasta file and returns its content.
 
         Raises:
             IsADirectoryError: When source_dir is not directory.
@@ -45,10 +45,10 @@ class Database:
 
     @staticmethod
     def _repair_fasta(file: Path):
-        repaired_content = []
+        repaired_content: list = []
         with open(file, 'r') as fh:
             i = 1
-            for line in fh.readlines():
+            for line in fh:
                 if line.startswith(">"):
                     repaired_content.append(f">{file.stem}|{i}\n")
                     i += 1
@@ -56,7 +56,7 @@ class Database:
                     repaired_content.append(line)
         return "".join(repaired_content)
 
-    def _create(self):
+    def create(self):
         """Function for making local blast database.
 
         Returns:
@@ -69,7 +69,7 @@ class Database:
         print("Processing host files...")
         try:
             start = time.time()
-            for host_fl in self.source_dir.iterdir():
+            for i, host_fl in enumerate(self.source_dir.iterdir(), 1):
                 if not host_fl.name.endswith(TYPES):
                     continue
                 with open('temp.fasta', 'a+') as fh:
@@ -77,6 +77,7 @@ class Database:
                         fh.write(self._repair_fasta(host_fl))
                     else:
                         fh.write(self._read_fasta(host_fl))
+                print(f'Processed {i} host files', end='\r')
             end = time.time()
             print(f"Host files concatenation time: {end - start}")
             stdout, stderr = NcbimakeblastdbCommandline(input_file="temp.fasta", dbtype="nucl", title="Host_DB",

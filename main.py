@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 from multiprocessing import Pool
 from jasper import database
+from jasper import crispr
 import time
 
 
@@ -22,6 +23,9 @@ def parse_args():
 
 if __name__ == "__main__":
     # args = parse_args()
-    db = database.Database("example_data/host", "my_db", repair_host_files=True)
-    query_df = db.query_multiple("example_data/virus")
-    print(query_df)
+    # db = database.Database("example_data/host", "my_db", repair_host_files=True)
+    # db.create()
+    # query_df = db.query_multiple("example_data/virus")
+    # print(query_df)
+    crispr_db = crispr.Crispr("example_data/host", db_name="crispr_db")
+    crispr_db.create()

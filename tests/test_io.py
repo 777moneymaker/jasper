@@ -16,7 +16,7 @@ class IOTests(unittest.TestCase):
             list(io.retrieve("data/empty_test_dir"))
 
     def test_perform_check_tools(self):
-        tools = map(io.perform_tool_check, ['blastn'])
+        tools = map(io.perform_tool_check, ['blastn', 'pilercr'])
         self.assertEqual(all(tools), True)
 
 
