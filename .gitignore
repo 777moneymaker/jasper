@@ -80,6 +80,7 @@ lib/
 lib64/
 lib64
 example_data/
+crispr_spacers/
 pyvenv.cfg
 
 # blast
