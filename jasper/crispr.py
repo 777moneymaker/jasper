@@ -44,8 +44,8 @@ class Crispr(database.Database):
 
             # Process the PILERCR output
             with open(out_name, 'r') as res_fh:
-                content = res_fh.read()
-                if "DETAIL REPORT" not in content:
+                content = res_fh.read()  # Read the content of PILERCR file.
+                if "DETAIL REPORT" not in content:  # 0 if no spacer found
                     results.append((out_name.stem.split(" ")[0].lstrip('>'), 0))
                 else:
                     content = content.split("DETAIL REPORT")[1].split("SUMMARY BY SIMILARITY")[0]
@@ -55,16 +55,18 @@ class Crispr(database.Database):
                             name = f"{line.lstrip('>').split(' ')[0]}|array{i}"
                             i += 1
                         try:
-                            line = list(filter(lambda x: x, line.split(" ")))
+                            line = list(filter(lambda x: x, line.split(" ")))  # Filter non empty strings
+
+                            # If line had 7 fields and any of 'ATGC' in 7'th field
                             if len(line) == 7 and any(base in line[6] for base in "ATGC"):
-                                results.append((name, line[6]))
-                                res_fasta = res_dir / Path(f"{out_name.stem}.fasta")
-                                seq = SeqRecord(Seq(line[6]), id=name, description="", name=name)
-                                with open(res_fasta, 'a+') as final_fh:
+                                results.append((name, line[6]))  # Append spacer
+                                res_fasta = res_dir / Path(f"{out_name.stem}.fasta")  # Open handle.
+                                seq = SeqRecord(Seq(line[6]), id=name, description="", name=name)  # Create seq
+                                with open(res_fasta, 'a+') as final_fh:  # Append seq to file
                                     SeqIO.write(seq, final_fh, 'fasta')
-                        except ValueError:
+                        except (ValueError, IndexError):
                             continue
-            out_name.unlink()
+            out_name.unlink()  # Delete PILERCR output file
         print(*results, sep='\n')
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
