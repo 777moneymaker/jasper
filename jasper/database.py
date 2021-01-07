@@ -89,17 +89,15 @@ class Database:
             print(e)
             return False
 
-    def delete_concat_fasta_files(self, db_name: str = "temp.fasta"):
-        # TODO: Write a function that will delete file containing concatenated host fasta files.
-        pass
-
     def query(self, vir_file: Path):
         """Function for making a BLAST query with local database.
 
         Args:
             vir_file (str): Virus file that will be used as query.
         Raises:
+            TypeError: When file is not a Path object.
             FileNotFoundError: When given vir_file is not a file.
+            ValueError: File has wrong extension.
         Returns:
             list: List containing tuples (query.name, target.name, best score)
         """
@@ -108,7 +106,7 @@ class Database:
         if not vir_file.is_file():
             raise FileNotFoundError('Given path is not a file.')
         if not vir_file.name.endswith(TYPES):
-            raise TypeError("Given file must end with *.fa | *.fna | .*fasta")
+            raise ValueError("Given file must end with *.fa | *.fna | .*fasta")
 
         out_file = f"{vir_file.stem}.score.txt"
         try:
@@ -124,7 +122,7 @@ class Database:
         return result
 
     def query_multiple(self, vir_dir: str):
-        """This function concats multiple vir files and makes a query with it."""
+        """TODO"""
         vir_dir = Path(vir_dir)
         # if not isinstance(vir_dir, Path):
         #     raise TypeError("File is not a Path object.")
