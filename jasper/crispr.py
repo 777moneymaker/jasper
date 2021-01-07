@@ -10,43 +10,49 @@ from jasper import database
 
 
 class Crispr(database.Database):
-    def __init__(self, host_path: str, db_name: str = "host_db", repair_host_files: bool = True,
-                 repair_vir_files: bool = True):
+    def __init__(self, host_path: str, db_name: str = "host_db", repair_host_files: bool = False,
+                 repair_vir_files: bool = False):
         super(Crispr, self).__init__(host_path, db_name, repair_host_files, repair_vir_files)
 
     def create(self):
         results = []
         for i, host_file in enumerate(self.source_dir.iterdir(), 1):
+            # TODO: Remove this line. Only for tests.
             if i == 20:
                 break
 
+            # Repair files if user want's to
             if self._repair_host_files:
                 repaired_content = self._repair_fasta(host_file)
             else:
                 repaired_content = self._read_fasta(host_file)
-            name = f"{str(host_file)}.repaired{host_file.suffix}"
+
+            name = f"{str(host_file)}.repaired{host_file.suffix}"  # Temp file for repaired seq
             with open(name, "w+") as repaired_fh:
                 repaired_fh.write(repaired_content)
-            res_dir = Path("crispr_spacers")
+
+            res_dir = Path("crispr_spacers")  # Make directory for PILERCR output.
             if not res_dir.exists():
                 res_dir.mkdir()
-            out_name = res_dir / Path(f"{host_file.stem}.txt")
-            host_file = Path(name)
-            self.find_crispr_spacers(host_file, out_name)
-            Path(name).unlink()
+
+            out_name = res_dir / Path(f"{host_file.stem}.txt")  # Output file for PILERCR.
+            host_file = Path(name)  # Host file from host dir.
+
+            self.find_crispr_spacers(host_file, out_name)  # Find crispr spacers for given file.
+            Path(name).unlink()  # Remove temp file for repaired seq
             print(f'Processed {i} host files for CRISPR identification')
 
+            # Process the PILERCR output
             with open(out_name, 'r') as res_fh:
                 content = res_fh.read()
                 if "DETAIL REPORT" not in content:
-                    results.append((out_name.stem, None))
+                    results.append((out_name.stem.split(" ")[0].lstrip('>'), 0))
                 else:
                     content = content.split("DETAIL REPORT")[1].split("SUMMARY BY SIMILARITY")[0]
-                    print(content)
                     i = 1
                     for line in content.splitlines():
                         if line.startswith(">"):
-                            name = f"{line.lstrip('>').split('|')[0]}|{i}"
+                            name = f"{line.lstrip('>').split(' ')[0]}|array{i}"
                             i += 1
                         try:
                             line = list(filter(lambda x: x, line.split(" ")))
