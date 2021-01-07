@@ -81,6 +81,7 @@ lib64/
 lib64
 example_data/
 crispr_spacers/
+jasper/__pycache__/
 *.tmp
 *.cfg
 
