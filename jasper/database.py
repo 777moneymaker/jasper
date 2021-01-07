@@ -36,15 +36,29 @@ class Database:
         """This function reads single fasta file and returns its content.
 
         Raises:
-            IsADirectoryError: When source_dir is not directory.
+            FileNotFoundError: When given path is not file.
         Returns:
-            (bool): Value indicating if file concatenation succeeded.
+            (str): Content of the file.
         """
+        if not file.is_file():
+            raise FileNotFoundError("Given path is not a file.")
+
         with open(file, 'r') as fh:
             return "".join(fh.readlines())
 
     @staticmethod
     def _repair_fasta(file: Path):
+        """This function reads single fasta file and returns its content.
+
+        Raises:
+            FileNotFoundError: When given path is not file.
+        Returns:
+            (str): Repaired content of the file.
+        """
+
+        if not file.is_file():
+            raise FileNotFoundError("Given path is not a file.")
+
         repaired_content: list = []
         with open(file, 'r') as fh:
             i = 1
@@ -90,7 +104,7 @@ class Database:
             return False
 
     def query(self, vir_file: Path):
-        """Function for making a BLAST query with local database.
+        """Function for making a BLAST query with database.
 
         Args:
             vir_file (str): Virus file that will be used as query.
