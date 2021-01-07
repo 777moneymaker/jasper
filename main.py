@@ -44,9 +44,17 @@ def parse_args():
 if __name__ == "__main__":
     print(LOGO)
     # args = parse_args()
-    # db = database.Database("example_data/host", "my_db", repair_host_files=True)
-    # db.create()
-    # query_df = db.query_multiple("example_data/virus")
-    # print(query_df)
-    crispr_db = crispr.Crispr("example_data/host", db_name="crispr_db", repair_host_files=True)
-    crispr_db.create()
+    config = {
+        "host_path": "example_data/host",
+        "db_name": "my_db",
+        "repair_host_files": True,
+        "repair_vir_files": True,
+    }
+    db = database.Database(config)
+    db.create()
+    query_df = db.query_multiple("example_data/virus")
+    print(query_df)
+    crispr_db = crispr.Crispr(config)
+    crispr_dict = crispr_db.create()
+    for key, val in crispr_dict.items():
+        print(key, len(val))

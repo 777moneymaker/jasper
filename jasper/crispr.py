@@ -11,13 +11,12 @@ from jasper import database
 
 
 class Crispr(database.Database):
-    def __init__(self, host_path: str, db_name: str = "host_db", repair_host_files: bool = False,
-                 repair_vir_files: bool = False):
-        super(Crispr, self).__init__(host_path, db_name, repair_host_files, repair_vir_files)
+    def __init__(self, config: dict) -> None:
+        super(Crispr, self).__init__(config)
 
-    def create(self):
+    def create(self) -> dict:
         results = defaultdict(list)
-        for i, host_file in enumerate(self.source_dir.iterdir(), 1):
+        for i, host_file in enumerate(self.host_dir.iterdir(), 1):
             # TODO: Remove this line. Only for tests.
             if i == 10:
                 break
@@ -67,10 +66,7 @@ class Crispr(database.Database):
                     except (ValueError, IndexError):
                         continue
             out_name.unlink()  # Delete PILERCR output file
-
         print()
-        for key, val in results.items():
-            print(key, len(val))
         return dict(results)
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
