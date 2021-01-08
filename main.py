@@ -5,6 +5,10 @@ from jasper import database
 from jasper import crispr
 import time
 
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+
 LOGO = r"""
       _   _    ____  ____  _____ ____  
      | | / \  / ___||  _ \| ____|  _ \ 
@@ -45,16 +49,33 @@ if __name__ == "__main__":
     print(LOGO)
     # args = parse_args()
     config = {
-        "host_path": "example_data/host",
+        "source_path": "example_data/host",
         "db_name": "my_db",
-        "repair_host_files": True,
-        "repair_vir_files": True,
+        "repair_source_files": True,
+        "repair_target_files": True,
     }
-    db = database.Database(config)
-    db.create()
-    query_df = db.query_multiple("example_data/virus")
-    print(query_df)
-    crispr_db = crispr.Crispr(config)
-    crispr_dict = crispr_db.create()
-    for key, val in crispr_dict.items():
-        print(key, len(val))
+    # db = database.Database(config)
+    # db.create()
+    # query_df = db.query_multiple("example_data/virus")
+    # print(query_df)
+    crispr_finder = crispr.CrisprFinder(config)
+    crispr_dict = crispr_finder.retrieve_spacers()
+    assert not Path("spacers.fasta").exists()
+    for key in crispr_dict.keys():
+        for i, spacer in enumerate(crispr_dict[key], 1):
+            with open("spacers.fasta", "a+") as fh:
+                seq_name = f"{key}.spacer|{i}"
+                SeqIO.write(SeqRecord(Seq(spacer),
+                                      name=seq_name,
+                                      id=seq_name,
+                                      description=""),
+                            fh, 'fasta')
+    vir_db = database.Database({
+        "source_path": "example_data/virus",
+        "db_name": "vir_db",
+        "repair_source_files": True,
+        "repair_target_files": False,
+    })
+    vir_db.create()
+    crispr_blast_results = vir_db.query(Path("spacers.fasta"))
+    print(crispr_blast_results)

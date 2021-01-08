@@ -24,10 +24,10 @@ TYPES = ('fasta', 'fa', 'fna')
 class Database:
     def __init__(self, config: dict) -> None:
         """Inits database with given name"""
-        self.host_dir: Path = Path(config["host_path"])
+        self.source_dir: Path = Path(config["source_path"])
         self.name: str = config["db_name"]
-        self._repair_host_files: bool = config["repair_host_files"]
-        self._repair_vir_files: bool = config["repair_host_files"]
+        self._repair_source_files: bool = config["repair_source_files"]
+        self._repair_target_files: bool = config["repair_target_files"]
 
     @staticmethod
     def _read_fasta(file: Path) -> str:
@@ -81,11 +81,11 @@ class Database:
         print("Processing host files...")
         try:
             start: float = time.time()
-            for i, host_file in enumerate(self.host_dir.iterdir(), 1):
+            for i, host_file in enumerate(self.source_dir.iterdir(), 1):
                 if not host_file.name.endswith(TYPES):
                     continue
                 with open('temp.fasta', 'a+') as fh:
-                    if self._repair_host_files:
+                    if self._repair_source_files:
                         fh.write(self._repair_fasta(host_file))
                     else:
                         fh.write(self._read_fasta(host_file))
@@ -104,11 +104,12 @@ class Database:
             print(e)
             return False
 
-    def query(self, vir_file: Path):
+    def query(self, query_file: Path, blast_format: str = "10 qseqid sseqid score"):
         """Function for making a BLAST query with database.
 
         Args:
-            vir_file (str): Virus file that will be used as query.
+            query_file (str): Query file that will be used as query.
+            blast_format (str): Format for blast results.
         Raises:
             TypeError: When file is not a Path object.
             FileNotFoundError: When given vir_file is not a file.
@@ -116,18 +117,18 @@ class Database:
         Returns:
             tuple or int: Tuple(query.name, target.name, best score) or 0 if query invalid.
         """
-        if not isinstance(vir_file, Path):
+        if not isinstance(query_file, Path):
             raise TypeError("File is not a Path object.")
-        if not vir_file.is_file():
+        if not query_file.is_file():
             raise FileNotFoundError('Given path is not a file.')
-        if not vir_file.name.endswith(TYPES):
+        if not query_file.name.endswith(TYPES):
             raise ValueError("Given file must end with *.fa | *.fna | .*fasta")
 
-        out_file: str = f"{vir_file.stem}.score.txt"
+        out_file: str = f"{query_file.stem}.score.txt"
         try:
-            NcbiblastnCommandline(query=vir_file,
+            NcbiblastnCommandline(query=query_file,
                                   db=f"{self.name}",
-                                  outfmt="10 qseqid sseqid score",
+                                  outfmt=blast_format,
                                   out=out_file,
                                   num_alignments=1,
                                   num_threads=5)()
@@ -140,9 +141,9 @@ class Database:
             Path(out_file).unlink()
         return result
 
-    def query_multiple(self, vir_dir: str) -> pd.DataFrame:
+    def query_multiple(self, query_dir: str) -> pd.DataFrame:
         """TODO"""
-        vir_dir: Path = Path(vir_dir)
+        vir_dir: Path = Path(query_dir)
         if not vir_dir.is_dir():
             raise FileNotFoundError('Given path is not a directory.')
 
@@ -154,7 +155,7 @@ class Database:
             with open('temp_vir.fasta', 'a+') as fh:
                 if not vir_fl.name.endswith(TYPES):
                     continue
-                if self._repair_host_files:
+                if self._repair_source_files:
                     fh.write(self._repair_fasta(vir_fl))
                 else:
                     fh.write(self._read_fasta(vir_fl))

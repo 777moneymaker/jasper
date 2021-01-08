@@ -10,19 +10,19 @@ from Bio import SeqIO
 from jasper import database
 
 
-class Crispr(database.Database):
+class CrisprFinder(database.Database):
     def __init__(self, config: dict) -> None:
-        super(Crispr, self).__init__(config)
+        super(CrisprFinder, self).__init__(config)
 
-    def create(self) -> dict:
+    def retrieve_spacers(self) -> dict:
         results = defaultdict(list)
-        for i, host_file in enumerate(self.host_dir.iterdir(), 1):
+        for i, host_file in enumerate(self.source_dir.iterdir(), 1):
             # TODO: Remove this line. Only for tests.
             if i == 10:
                 break
 
             # Repair files if user want's to
-            if self._repair_host_files:
+            if self._repair_source_files:
                 repaired_content = self._repair_fasta(host_file)
             else:
                 repaired_content = self._read_fasta(host_file)
