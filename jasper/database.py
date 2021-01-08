@@ -26,8 +26,6 @@ class Database:
         """Inits database with given name"""
         self.source_dir: Path = Path(config["source_path"])
         self.name: str = config["db_name"]
-        self._repair_source_files: bool = config["repair_source_files"]
-        self._repair_target_files: bool = config["repair_target_files"]
 
     @staticmethod
     def _read_fasta(file: Path) -> str:
@@ -55,6 +53,7 @@ class Database:
         """
 
         if not file.is_file():
+            print(file)
             raise FileNotFoundError("Given path is not a file.")
 
         repaired_content: list = []
@@ -85,13 +84,10 @@ class Database:
                 if not host_file.name.endswith(TYPES):
                     continue
                 with open('temp.fasta', 'a+') as fh:
-                    if self._repair_source_files:
-                        fh.write(self._repair_fasta(host_file))
-                    else:
-                        fh.write(self._read_fasta(host_file))
+                    fh.write(self._repair_fasta(host_file))
                 print(f'Processed {i} host files', end='\r')
             end: float = time.time()
-            print(f"Host files concatenation time: {end - start}")
+            print(f"Source files concatenation time: {end - start}")
             stdout, stderr = NcbimakeblastdbCommandline(input_file="temp.fasta",
                                                         dbtype="nucl",
                                                         title="Host_DB",
@@ -104,7 +100,7 @@ class Database:
             print(e)
             return False
 
-    def query(self, query_file: Path, blast_format: str = "10 qseqid sseqid score"):
+    def query(self, query_file: Path, config: dict, blast_format: str = "10 qseqid sseqid score"):
         """Function for making a BLAST query with database.
 
         Args:
@@ -131,7 +127,8 @@ class Database:
                                   outfmt=blast_format,
                                   out=out_file,
                                   num_alignments=1,
-                                  num_threads=5)()
+                                  num_threads=5,
+                                  **config)()
             with open(out_file, 'r') as fh:
                 line: list = fh.readline().rstrip().split(',')
                 result: tuple = (line[0], line[1], line[2])
@@ -141,39 +138,42 @@ class Database:
             Path(out_file).unlink()
         return result
 
-    def query_multiple(self, query_dir: str) -> pd.DataFrame:
+    def query_multiple(self, query_dir: str, config: dict, headers=None) -> pd.DataFrame:
         """TODO"""
-        vir_dir: Path = Path(query_dir)
-        if not vir_dir.is_dir():
+        if headers is None:
+            headers = ["Virus", "Host", "Score"]
+        query_dir: Path = Path(query_dir)
+        if not query_dir.is_dir():
             raise FileNotFoundError('Given path is not a directory.')
 
-        print("Processing virus files...")
+        print("Processing target files...")
         start: float = time.time()
-        i = 1
-        for vir_fl in vir_dir.iterdir():
-            if i == 20: break
+        for query_fl in query_dir.iterdir():
             with open('temp_vir.fasta', 'a+') as fh:
-                if not vir_fl.name.endswith(TYPES):
+                if not query_fl.name.endswith(TYPES):
                     continue
-                if self._repair_source_files:
-                    fh.write(self._repair_fasta(vir_fl))
-                else:
-                    fh.write(self._read_fasta(vir_fl))
-                i += 1
+                # Repair target seq
+                fh.write(self._repair_fasta(query_fl))
         end: float = time.time()
-        print(f"Virus files concatenation ended. Time: {end - start}")
+        print(f"Target files concatenation ended. Time: {end - start}")
 
         start = time.time()
         print("Quering...")
         stdout, stderr = NcbiblastnCommandline(query="temp_vir.fasta",
                                                db=f"{self.name}",
                                                outfmt="10 qseqid sseqid score",
-                                               # out="vir_results.txt",
                                                num_threads=5,
-                                               num_alignments=1)()
+                                               num_alignments=1,
+                                               **config)()
         end = time.time()
         print(f"Query time: {end - start}")
         Path("temp_vir.fasta").unlink()
+        if not headers:
+            headers = ["Virus", "Host", "Score"]
+        results_df: pd.DataFrame = pd.read_csv(io.StringIO(stdout), header=None, names=headers)
+        return results_df
 
-        results_df: pd.DataFrame = pd.read_csv(io.StringIO(stdout), header=None, names=["Virus", "Host", "Score"])
-        return results_df.groupby(["Virus", "Host"]).max().sort_values(by='Score', ascending=False)
+    def clear_files(self):
+        for file in Path(".").iterdir():
+            if file.stem == self.name and file.suffix in (".nhr", ".nin", ".nsq"):
+                file.unlink()

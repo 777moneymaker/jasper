@@ -14,19 +14,14 @@ class CrisprFinder(database.Database):
     def __init__(self, config: dict) -> None:
         super(CrisprFinder, self).__init__(config)
 
-    def retrieve_spacers(self) -> dict:
-        results = defaultdict(list)
+    def retrieve_spacers(self) -> None:
+        start: float = time.time()
         for i, host_file in enumerate(self.source_dir.iterdir(), 1):
-            # TODO: Remove this line. Only for tests.
-            if i == 10:
-                break
-
+            # Remove this line. Only for tests.
+            # if i == 100:
+            #     break
             # Repair files if user want's to
-            if self._repair_source_files:
-                repaired_content = self._repair_fasta(host_file)
-            else:
-                repaired_content = self._read_fasta(host_file)
-
+            repaired_content = self._repair_fasta(host_file)
             name = f"{str(host_file)}.repaired{host_file.suffix}"  # Temp file for repaired seq
             with open(name, "w+") as repaired_fh:
                 repaired_fh.write(repaired_content)
@@ -46,28 +41,27 @@ class CrisprFinder(database.Database):
             with open(out_name, 'r') as res_fh:
                 content = res_fh.read()  # Read the content of PILERCR file.
                 if "DETAIL REPORT" not in content:  # If spacer not found then continue
+                    out_name.unlink()
                     continue
 
                 content = content.split("DETAIL REPORT")[1].split("SUMMARY BY SIMILARITY")[0]  # Get only spacers region
                 for line in content.splitlines():
                     if line.startswith(">"):
                         name = f"{line.lstrip('>').split(' ')[0]}"
-
                     try:
                         line = list(filter(lambda x: x, line.split(" ")))  # Filter non empty strings
-
-                        # If line had 7 fields and any of 'ATGC' in last field
                         if len(line) == 7 and any(base in line[6] for base in "ATGC"):
-                            results[name].append(line[6])  # Append spacer
-                            res_fasta = res_dir / Path(f"{out_name.stem}.fasta")  # Open handle.
+                            # If line had 7 fields and any of 'ATGC' in last field
                             seq = SeqRecord(Seq(line[6]), id=name, description="", name=name)  # Create seq
+                            res_fasta = res_dir / Path(f"{name}.fasta")  # Result file for spacers
                             with open(res_fasta, 'a+') as final_fh:  # Append seq to file
                                 SeqIO.write(seq, final_fh, 'fasta')
                     except (ValueError, IndexError):
                         continue
-            out_name.unlink()  # Delete PILERCR output file
-        print()
-        return dict(results)
+
+                out_name.unlink()  # Delete PILERCR output file
+        end: float = time.time()
+        print(f"Crispr finding including repairment: {end - start}")
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
         result = subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)],

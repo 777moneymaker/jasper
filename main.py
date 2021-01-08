@@ -4,6 +4,7 @@ from multiprocessing import Pool
 from jasper import database
 from jasper import crispr
 import time
+import shutil
 
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -48,34 +49,55 @@ def parse_args():
 if __name__ == "__main__":
     print(LOGO)
     # args = parse_args()
-    config = {
+    megablast_config = {
+        "task": "megablast",
+        "evalue": 10,
+        "gapopen": 0,
+        "gapextend": 2,
+        "penalty": -2,
+        "word_size": 28,
+        "dust": "20 64 1",
+    }
+    db = database.Database({
         "source_path": "example_data/host",
         "db_name": "my_db",
-        "repair_source_files": True,
-        "repair_target_files": True,
-    }
-    # db = database.Database(config)
-    # db.create()
-    # query_df = db.query_multiple("example_data/virus")
-    # print(query_df)
-    crispr_finder = crispr.CrisprFinder(config)
-    crispr_dict = crispr_finder.retrieve_spacers()
-    assert not Path("spacers.fasta").exists()
-    for key in crispr_dict.keys():
-        for i, spacer in enumerate(crispr_dict[key], 1):
-            with open("spacers.fasta", "a+") as fh:
-                seq_name = f"{key}.spacer|{i}"
-                SeqIO.write(SeqRecord(Seq(spacer),
-                                      name=seq_name,
-                                      id=seq_name,
-                                      description=""),
-                            fh, 'fasta')
+    })
+    db.create()
+    query_df = db.query_multiple("example_data/virus", config=megablast_config)
+    db.clear_files()
+
+    blast_results = query_df.sort_values(['Virus', 'Score'], ascending=False).groupby(['Virus']).first().reset_index()
+    print("Megablast results (genome-genome query): ")
+    print(blast_results.sort_values(by="Score", ascending=False))
+
+    crispr_finder = crispr.CrisprFinder({
+        "source_path": "example_data/host",
+        "db_name": "my_db",
+    })
+    crispr_finder.retrieve_spacers()
+
     vir_db = database.Database({
         "source_path": "example_data/virus",
         "db_name": "vir_db",
-        "repair_source_files": True,
-        "repair_target_files": False,
     })
     vir_db.create()
-    crispr_blast_results = vir_db.query(Path("spacers.fasta"))
+
+    spacers_blast_config = {
+        "task": "blastn-short",
+        "evalue": 1,
+        "gapopen": 10,
+        "gapextend": 2,
+        "penalty": -1,
+        "word_size": 7,
+        "dust": "no",
+    }
+
+    crispr_blast_results = vir_db.query_multiple(Path("crispr_spacers/"), config=spacers_blast_config, headers=["Spacer", "Virus", "Score"])
+    vir_db.clear_files()
+    shutil.rmtree(Path("crispr_spacers/"))
+
+    crispr_blast_results.reindex(["Virus", "Spacer", "Score"], axis=1)
+    crispr_blast_results = crispr_blast_results.sort_values(['Virus', 'Score'], ascending=False).groupby(['Virus']).first().reset_index()
+
+    print("blastn-short results (vir_genome-spacers query): ")
     print(crispr_blast_results)
