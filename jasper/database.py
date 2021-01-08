@@ -13,6 +13,7 @@ import time
 import io
 import pandas as pd
 from pathlib import Path, PurePath
+from __future__ import annotations
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 
@@ -67,7 +68,7 @@ class Database:
                     repaired_content.append(line)
         return "".join(repaired_content)
 
-    def create(self) -> bool:
+    def create(self) -> Database:
         """Function for making local blast database.
 
         Returns:
@@ -95,10 +96,10 @@ class Database:
             Path("temp.fasta").unlink()
 
             print(stdout)
-            return True
+            return self
         except Exception as e:
             print(e)
-            return False
+            exit(0)
 
     def query(self, query_file: Path, config: dict, blast_format: str = "10 qseqid sseqid score"):
         """Function for making a BLAST query with database.

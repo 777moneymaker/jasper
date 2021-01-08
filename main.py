@@ -56,13 +56,11 @@ if __name__ == "__main__":
         "gapextend": 2,
         "penalty": -2,
         "word_size": 28,
-        "dust": "20 64 1",
     }
     db = database.Database({
         "source_path": "example_data/host",
         "db_name": "my_db",
-    })
-    db.create()
+    }).create()
     query_df = db.query_multiple("example_data/virus", config=megablast_config)
     db.clear_files()
 
@@ -79,8 +77,7 @@ if __name__ == "__main__":
     vir_db = database.Database({
         "source_path": "example_data/virus",
         "db_name": "vir_db",
-    })
-    vir_db.create()
+    }).create()
 
     spacers_blast_config = {
         "task": "blastn-short",
