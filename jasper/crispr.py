@@ -18,7 +18,7 @@ class CrisprFinder(database.Database):
         start: float = time.time()
         for i, host_file in enumerate(self.source_dir.iterdir(), 1):
             # Remove this line. Only for tests.
-            # if i == 100:
+            # if i == 15:
             #     break
             # Repair files if user want's to
             repaired_content = self._repair_fasta(host_file)
@@ -61,7 +61,7 @@ class CrisprFinder(database.Database):
 
                 out_name.unlink()  # Delete PILERCR output file
         end: float = time.time()
-        print(f"Crispr finding including repairment: {end - start}")
+        print(f"Crispr finding including repairment: {end - start :.2f}")
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
         result = subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)],

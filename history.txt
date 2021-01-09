@@ -1,0 +1,83 @@
+
+      _   _    ____  ____  _____ ____  
+     | | / \  / ___||  _ \| ____|  _ \ 
+  _  | |/ _ \ \___ \| |_) |  _| | |_) |
+ | |_| / ___ \ ___) |  __/| |___|  _ < 
+  \___/_/   \_\____/|_|   |_____|_| \_\    
+  
+  ========================================
+  
+            |-----------------|
+             \---------------/
+              ~-_---------_-~
+                ~-_---_-~
+                   ~-_
+                _-~---~-_
+              _-~---------~-_
+             /---------------\
+            |-----------------|                               
+
+Processing host files...
+Source files concatenation time: 14.63
+
+
+Building a new DB, current time: 01/09/2021 03:42:49
+New DB name:   /home/mlchodkowski/Desktop/JASPER/my_db
+New DB title:  Host_DB
+Sequence type: Nucleotide
+Keep MBits: T
+Maximum file size: 1000000000B
+Adding sequences from FASTA; added 1116 sequences in 17.4996 seconds.
+
+Processing target files...
+Target files concatenation ended. Time: 0.02
+Quering...
+Query time: 18.06
+Megablast results (genome-genome query): 
+          Virus         Host   Score
+0   NC_001884|1  NC_000964|1  134385
+1   NC_000924|1  NC_002655|1   61670
+2   NC_003157|1  NC_004070|1   43103
+3   NC_002667|1  NC_002662|1   41789
+4   NC_004585|1  NC_004070|1   41072
+..          ...          ...     ...
+66  NC_001604|1  NC_002947|1      48
+67  NC_004462|1  NC_006461|1      45
+68  NC_003085|1  NC_008095|1      38
+69  NC_004166|1  NC_000964|1      38
+70  NC_002656|1  NC_007951|1      28
+
+[71 rows x 3 columns]
+Processing host files...
+Source files concatenation time: 0.02
+Crispr finding time including repairment: 478.99
+
+
+Building a new DB, current time: 01/09/2021 03:51:34
+New DB name:   /home/mlchodkowski/Desktop/JASPER/vir_db
+New DB title:  Host_DB
+Sequence type: Nucleotide
+Keep MBits: T
+Maximum file size: 1000000000B
+Adding sequences from FASTA; added 117 sequences in 0.018136 seconds.
+
+Processing target files...
+Target files concatenation ended. Time: 0.02
+Quering...
+Query time: 8.81
+blastn-short results (vir_genome-spacers query): 
+           Virus     Spacer  Score
+0    NC_000866|1  NC_009437    818
+1    NC_003387|1  NC_009523    621
+2    NC_003085|1  NC_008095    445
+3    NC_004333|1  NC_009523    443
+4    NC_003309|1  NC_009523    438
+..           ...        ...    ...
+110  NC_004301|1  NC_005966     17
+111  NC_004175|1  NC_003272     17
+112  NC_001890|1  NC_003198     17
+113  NC_003716|1  NC_007333     16
+114  NC_002180|1  NC_006347     15
+
+[115 rows x 3 columns]
+

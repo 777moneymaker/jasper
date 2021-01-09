@@ -63,10 +63,10 @@ if __name__ == "__main__":
     }).create()
     query_df = db.query_multiple("example_data/virus", config=megablast_config)
     db.clear_files()
-
-    blast_results = query_df.sort_values(['Virus', 'Score'], ascending=False).groupby(['Virus']).first().reset_index()
+    blast_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]
+    final_blast_results = blast_results.sort_values(by="Score", ascending=False).reset_index(drop=True)
     print("Megablast results (genome-genome query): ")
-    print(blast_results.sort_values(by="Score", ascending=False))
+    print(final_blast_results)
 
     crispr_finder = crispr.CrisprFinder({
         "source_path": "example_data/host",
@@ -89,12 +89,16 @@ if __name__ == "__main__":
         "dust": "no",
     }
 
-    crispr_blast_results = vir_db.query_multiple(Path("crispr_spacers/"), config=spacers_blast_config, headers=["Spacer", "Virus", "Score"])
+    crispr_results = vir_db.query_multiple(Path("crispr_spacers/"), config=spacers_blast_config, headers=["Spacer", "Virus", "Score"])
     vir_db.clear_files()
     shutil.rmtree(Path("crispr_spacers/"))
 
-    crispr_blast_results.reindex(["Virus", "Spacer", "Score"], axis=1)
-    crispr_blast_results = crispr_blast_results.sort_values(['Virus', 'Score'], ascending=False).groupby(['Virus']).first().reset_index()
+    crispr_results.reindex(["Virus", "Spacer", "Score"], axis=1)
+    crispr_results["Spacer"] = crispr_results["Spacer"].map(lambda x: x.split("|")[0])
+
+    crispr_results = crispr_results.groupby(["Virus", "Spacer"]).sum().reset_index()
+    idx = crispr_results.groupby(['Virus'])['Score'].idxmax()
+    crispr_final_results = crispr_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
 
     print("blastn-short results (vir_genome-spacers query): ")
-    print(crispr_blast_results)
+    print(crispr_final_results)

@@ -9,11 +9,12 @@ More about it:
 
     3. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2447716/
 """
+from __future__ import annotations
+
 import time
 import io
 import pandas as pd
 from pathlib import Path, PurePath
-from __future__ import annotations
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 
@@ -88,7 +89,7 @@ class Database:
                     fh.write(self._repair_fasta(host_file))
                 print(f'Processed {i} host files', end='\r')
             end: float = time.time()
-            print(f"Source files concatenation time: {end - start}")
+            print(f"Source files concatenation time: {end - start :.2f}")
             stdout, stderr = NcbimakeblastdbCommandline(input_file="temp.fasta",
                                                         dbtype="nucl",
                                                         title="Host_DB",
@@ -107,6 +108,7 @@ class Database:
         Args:
             query_file (str): Query file that will be used as query.
             blast_format (str): Format for blast results.
+            config (dict): Configuration for BLAST.
         Raises:
             TypeError: When file is not a Path object.
             FileNotFoundError: When given vir_file is not a file.
@@ -156,7 +158,7 @@ class Database:
                 # Repair target seq
                 fh.write(self._repair_fasta(query_fl))
         end: float = time.time()
-        print(f"Target files concatenation ended. Time: {end - start}")
+        print(f"Target files concatenation ended. Time: {end - start:.2f}")
 
         start = time.time()
         print("Quering...")
@@ -167,7 +169,7 @@ class Database:
                                                num_alignments=1,
                                                **config)()
         end = time.time()
-        print(f"Query time: {end - start}")
+        print(f"Query time: {end - start :.2f}")
         Path("temp_vir.fasta").unlink()
         if not headers:
             headers = ["Virus", "Host", "Score"]
