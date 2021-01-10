@@ -116,7 +116,6 @@ if __name__ == "__main__":
     short_results = short_results.drop(columns=['Qlen', 'Alen', 'Mis', 'Gap'])
 
     short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index()
-    print(short_results)
     short_results.reindex(["Virus", "Spacer", "Score"], axis=1)
     short_results["Spacer"] = short_results["Spacer"].map(lambda x: x.split("|")[0])
 
