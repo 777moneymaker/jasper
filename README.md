@@ -8,6 +8,21 @@ Jasper uses a bunch of bioinformatics tools to prediction virus hosts. It includ
 
 
 ## Requirements
+### Naming convention
+**Jasper** depends on good file naming convention. The best is to use sequence ID as file name, e.x. `NC_008876.fna`. Software will use this id to name every temp file that needs to be created and also it will use this ID in results file.
+
+If you put multiple contigs in a single file, there is no problem with that. Just be sure that every contig is in it's right file. **Jasper** repairs every file it read, by default naming it `<id from filename>|<#contig>` e.x.:
+```
+>NC_000856|1
+ATGCT....
+>NC_000856|2
+ATGCA....
+# and so on
+```
+So even if you have, for instance, one genome in your file, then **Jasper** will change it's id to `<id from filename>|1`.
+
+------------
+
 ### Python Libraries
 ```
 Biopython
