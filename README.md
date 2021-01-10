@@ -20,6 +20,7 @@ Six
 ```
 NCBI-Blast+
 PILER-CR
+tRNAscan-SE
 ```
 ## Installation
 ##### *I will make a simple installation script in my free time.*
@@ -31,6 +32,7 @@ PILER-CR
 
 * To install NCBI-Blast+ use `sudo apt install ncbi-blast+`
 * To install PILER-CR go [here](http://www.drive5.com/pilercr/), dowload compiled software, move somwhere and add to `$PATH`.
+* To install tRNAscan-SE use `sudo apt install trnascan-se`
 
 After that go to JASPER's main directory and:
 ```
