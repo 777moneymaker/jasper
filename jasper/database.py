@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 import io
 import pandas as pd
-from pathlib import Path, PurePath
+from pathlib import Path
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 
@@ -24,13 +24,14 @@ TYPES = ('fasta', 'fa', 'fna')
 
 
 class Database:
-    def __init__(self, config: dict) -> None:
+    def __init__(self, source_dir: Path, name: str) -> None:
         """Inits database with given name"""
-        self.source_dir: Path = Path(config["source_path"])
-        self.name: str = config["db_name"]
+        if not Path(source_dir).exists():
+            raise FileNotFoundError("Given path does not exist.")
+        self.source_dir = Path(source_dir)
+        self.name = name
 
-    @staticmethod
-    def _read_fasta(file: Path) -> str:
+    def _read_fasta(self, file: Path) -> str:
         """This function reads single fasta file and returns its content.
 
         Raises:
@@ -44,8 +45,7 @@ class Database:
         with open(file, 'r') as fh:
             return "".join(fh.readlines())
 
-    @staticmethod
-    def _repair_fasta(file: Path):
+    def _repair_fasta(self, file: Path):
         """This function reads single fasta file and returns its content.
 
         Raises:
@@ -55,16 +55,16 @@ class Database:
         """
 
         if not file.is_file():
-            print(file)
             raise FileNotFoundError("Given path is not a file.")
 
         repaired_content: list = []
+        contig: int = 1
         with open(file, 'r') as fh:
-            i: int = 1
             for line in fh:
                 if line.startswith(">"):
-                    repaired_content.append(f">{file.stem}|{i}\n")
-                    i += 1
+                    seq_id = f">{file.stem}|{contig}\n"
+                    repaired_content.append(seq_id)
+                    contig += 1
                 else:
                     repaired_content.append(line)
         return "".join(repaired_content)
@@ -79,24 +79,26 @@ class Database:
             (*.nhr, *.nin, *.nsq): Created database's files in LMBD format.
         """
 
-        print("Processing host files...")
+        print("Processing source files...")
         try:
             start: float = time.time()
-            for i, host_file in enumerate(self.source_dir.iterdir(), 1):
-                if not host_file.name.endswith(TYPES):
+
+            for i, source_file in enumerate(self.source_dir.iterdir(), 1):
+                if not source_file.name.endswith(TYPES):
                     continue
                 with open('temp.fasta', 'a+') as fh:
-                    fh.write(self._repair_fasta(host_file))
-                print(f'Processed {i} host files', end='\r')
+                    fh.write(self._repair_fasta(source_file))
+                    print(f'Processed {i} host files', end='\r')
+
             end: float = time.time()
-            print(f"Source files concatenation time: {end - start :.2f}")
+            print(f"Source files aggregation time: {end - start :.2f}")
+
             stdout, stderr = NcbimakeblastdbCommandline(input_file="temp.fasta",
                                                         dbtype="nucl",
-                                                        title="Host_DB",
-                                                        out=f"{self.name}")()
-            Path("temp.fasta").unlink()
-
+                                                        title=self.name,
+                                                        out=self.name)()
             print(stdout)
+            Path("temp.fasta").unlink()
             return self
         except Exception as e:
             print(e)
@@ -110,69 +112,63 @@ class Database:
             blast_format (str): Format for blast results.
             config (dict): Configuration for BLAST.
         Raises:
-            TypeError: When file is not a Path object.
             FileNotFoundError: When given vir_file is not a file.
             ValueError: File has wrong extension.
         Returns:
             tuple or int: Tuple(query.name, target.name, best score) or 0 if query invalid.
         """
-        if not isinstance(query_file, Path):
-            raise TypeError("File is not a Path object.")
         if not query_file.is_file():
             raise FileNotFoundError('Given path is not a file.')
         if not query_file.name.endswith(TYPES):
             raise ValueError("Given file must end with *.fa | *.fna | .*fasta")
 
-        out_file: str = f"{query_file.stem}.score.txt"
+        blast_result_file: Path = Path(f"{query_file.stem}.score")
         try:
             NcbiblastnCommandline(query=query_file,
                                   db=f"{self.name}",
                                   outfmt=blast_format,
-                                  out=out_file,
+                                  out=blast_result_file,
                                   num_alignments=1,
                                   num_threads=5,
                                   **config)()
-            with open(out_file, 'r') as fh:
+            with open(blast_result_file, 'r') as fh:
                 line: list = fh.readline().rstrip().split(',')
-                result: tuple = (line[0], line[1], line[2])
+                result: tuple = tuple(line)
         except (IndexError, ValueError):
-            result: int = 0
+            pass
         finally:
-            Path(out_file).unlink()
+            Path(blast_result_file).unlink()
         return result
 
-    def query_multiple(self, query_dir: str, config: dict, headers=None) -> pd.DataFrame:
+    def query_multiple(self, query_dir: Path, config: dict,
+                       headers=("Virus", "Host", "Score"), blast_format: str = "10 qseqid sseqid score") -> pd.DataFrame:
         """TODO"""
-        if headers is None:
-            headers = ["Virus", "Host", "Score"]
-        query_dir: Path = Path(query_dir)
+
         if not query_dir.is_dir():
             raise FileNotFoundError('Given path is not a directory.')
 
         print("Processing target files...")
         start: float = time.time()
-        for query_fl in query_dir.iterdir():
+
+        for query_file in query_dir.iterdir():
             with open('temp_vir.fasta', 'a+') as fh:
-                if not query_fl.name.endswith(TYPES):
+                if not query_file.name.endswith(TYPES):
                     continue
-                # Repair target seq
-                fh.write(self._repair_fasta(query_fl))
+                fh.write(self._repair_fasta(query_file))  # Repair target seq
         end: float = time.time()
-        print(f"Target files concatenation ended. Time: {end - start:.2f}")
+        print(f"Target files aggregation ended. Time: {end - start:.2f}")
 
         start = time.time()
         print("Quering...")
         stdout, stderr = NcbiblastnCommandline(query="temp_vir.fasta",
                                                db=f"{self.name}",
-                                               outfmt="10 qseqid sseqid score",
+                                               outfmt=blast_format,
                                                num_threads=5,
                                                num_alignments=1,
                                                **config)()
         end = time.time()
         print(f"Query time: {end - start :.2f}")
         Path("temp_vir.fasta").unlink()
-        if not headers:
-            headers = ["Virus", "Host", "Score"]
         results_df: pd.DataFrame = pd.read_csv(io.StringIO(stdout), header=None, names=headers)
         return results_df
 
