@@ -75,9 +75,10 @@ TODO
 ```
 
 
-## Additional information
-[PILER-CR](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-8-18)
-[NCBI-BLAST+](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
+## References
+* Edgar, R.C. (2007) [PILER-CR: fast and accurate identification of CRISPR repeats](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18
+* Fichant and Burks, J. Mol. Biol. (1991) Identification of tRNA genes in genomic DNA, 220:659-671.
+* [NCBI-BLAST+](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
