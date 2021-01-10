@@ -34,6 +34,13 @@ tRNAscan-SE
 * To install PILER-CR go [here](http://www.drive5.com/pilercr/), dowload compiled software, move somwhere and add to `$PATH`.
 * To install tRNAscan-SE use `sudo apt install trnascan-se`
 
+By defaults, tRNAscan-SE install as `trnascan-1.4`. Be sure to use `trnascan` alias in your bash. To do it:
+```
+vim ~/.bashrc
+    alias trnascan="trnascan-1.4"
+source ~/.bashrc
+```
+
 After that go to JASPER's main directory and:
 ```
 python3 setup.py install
