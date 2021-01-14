@@ -28,6 +28,8 @@ class Database:
         """Inits database with given name"""
         if not Path(source_dir).exists():
             raise FileNotFoundError("Given path does not exist.")
+        if not Path(source_dir).is_dir():
+            raise FileNotFoundError("Given path is not a directory")
         self.source_dir = Path(source_dir)
         self.name = name
 
@@ -55,6 +57,17 @@ class Database:
                     repaired_content.append(line)
         return "".join(repaired_content)
 
+    def _aggregate(self):
+        if Path('blast_input.fasta').exists():
+            Path('blast_input.fasta').unlink()
+        for source_file in self.source_dir.iterdir():
+            if not source_file.name.endswith(utils.TYPES):
+                continue
+            with open('blast_input.fasta', 'a+') as fh:
+                fh.write(self._repair_fasta(source_file))
+        if os.path.getsize('blast_input.fasta') == 0:
+            raise ValueError("Blast input file is empty. Check your input.")
+
     def create(self) -> tuple:
         """Function for making local blast database.
 
@@ -65,14 +78,7 @@ class Database:
             (*.nhr, *.nin, *.nsq): Created database's files in LMBD format.
         """
 
-        if Path('blast_input.fasta').exists():
-            Path('blast_input.fasta').unlink()
-        for i, source_file in enumerate(self.source_dir.iterdir(), 1):
-            if not source_file.name.endswith(utils.TYPES):
-                continue
-            with open('blast_input.fasta', 'a+') as fh:
-                fh.write(self._repair_fasta(source_file))
-
+        self._aggregate()
         try:
             cmd = NcbimakeblastdbCommandline(input_file="blast_input.fasta",
                                              dbtype="nucl",
@@ -94,7 +100,7 @@ class Database:
                 Path("blast_input.fasta").unlink()
             return self, makeblastdb_output.stdout.decode()
 
-    def query(self, query_dir: Path, config: dict,
+    def query(self, query_dir: Path, num_threads: int, config: dict,
               headers=("Virus", "Host", "Score"),
               blast_format: str = "10 qseqid sseqid score") -> pd.DataFrame:
         """TODO"""
@@ -113,7 +119,7 @@ class Database:
             cmd = NcbiblastnCommandline(query="blast_query.fasta",
                                         db=f"{self.name}",
                                         outfmt=blast_format,
-                                        num_threads=os.cpu_count(),
+                                        num_threads=num_threads,
                                         max_target_seqs=1,
                                         **config)
             blastn_output = subprocess.run(str(cmd), capture_output=True, shell=True)
@@ -135,6 +141,7 @@ class Database:
             if file.stem == self.name and file.suffix in (".nhr", ".nin", ".nsq"):
                 file.unlink()
 
+
 def main(args):
     print(utils.LOGO)
     args.blastn_config = utils.parse_config(args.blastn_config, {
@@ -148,7 +155,7 @@ def main(args):
     else:
         db = Database(Path('.'), args.use_db_name)
     print("Quering...")
-    query_df = db.query(Path(args.virus_dir), config=args.blastn_config)
+    query_df = db.query(Path(args.virus_dir), num_threads=args.num_threads, config=args.blastn_config)
 
     query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
     mega_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]

@@ -25,7 +25,7 @@ class CrisprFinder(blast.Database):
         if not results_dir.exists():
             results_dir.mkdir()
 
-        for i, host in enumerate(self.source_dir.iterdir(), 1):
+        for host in self.source_dir.iterdir():
             if not host.name.endswith(utils.TYPES):
                 continue
 
@@ -97,6 +97,7 @@ def main(args):
     print("Quering...")
     query_df = vir_db.query(Path("crispr_spacers/"),
                             config=args.short_config,
+                            num_threads=args.num_threads,
                             blast_format="10 qseqid sseqid score qlen length mismatch gaps",
                             headers=["Spacer", "Virus", "Score", "Qlen", "Alen", "Mis", "Gap"])
     shutil.rmtree(Path("crispr_spacers/"))

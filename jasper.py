@@ -1,4 +1,5 @@
 import argparse
+import os
 
 
 def parse_args():
@@ -16,12 +17,12 @@ def parse_args():
                                            "Check my github @ github.com/777moneymaker",
                                     usage="jasper.database [-h] -vir VIRUS_DIR [-c BLASTN_CONFIG] --use_db USE_DB_NAME |  (--create_db CREATE_DB_NAME -hst HOST_DIR)")
     parser_b._optionals.title = "arguments"
-    parser_b.add_argument("-vir", "--virus",
+    parser_b.add_argument("--virus",
                           required=True,
                           type=str,
                           dest='virus_dir',
                           help='directory containing virus seq files.')
-    parser_b.add_argument("-c", "--config",
+    parser_b.add_argument("--config",
                           required=False,
                           type=str,
                           dest='blastn_config',
@@ -30,12 +31,19 @@ def parse_args():
                           action='store_true',
                           dest='clear_after',
                           help='Specifies if the database files should be deleted after analysis.')
-    parser_b.add_argument('-o', '--output',
+    parser_b.add_argument('--output',
                           required=False,
                           type=str,
                           dest="output_file",
                           default="blast_results.csv",
                           help="Output file with final results.")
+    parser_b.add_argument('--num_threads',
+                          required=False,
+                          type=str,
+                          dest="output_file",
+                          default=os.cpu_count(),
+                          help="Output file with final results.")
+
 
     group_b = parser_b.add_mutually_exclusive_group()
     group_b.add_argument("--use_db",
@@ -47,7 +55,7 @@ def parse_args():
                             type=str,
                             dest='create_db_name',
                             help='Name for a new database that will be created.')
-    subgroup_b.add_argument("-hst", "--host",
+    subgroup_b.add_argument("--host",
                             type=str,
                             dest='host_dir',
                             help='directory containing host seq files.')
@@ -60,17 +68,17 @@ def parse_args():
                                            "Check my github @ github.com/777moneymaker",
                                     usage="jasper.database [-h] -hst HOST_DIR [-c BLASTN_CONFIG] --use_db USE_DB_NAME |  (--create_db CREATE_DB_NAME -vir VIRUS_DIR)")
     parser_c._optionals.title = "arguments"
-    parser_c.add_argument("-hst", "--host",
+    parser_c.add_argument("--host",
                           type=str,
                           required=True,
                           dest='host_dir',
                           help='directory containing host seq files.')
-    parser_c.add_argument("-c", "--config",
+    parser_c.add_argument("--config",
                           required=False,
                           type=str,
                           dest='short_config',
                           help='File containing megablast config used in genome-genome query.')
-    parser_c.add_argument("--allowed",
+    parser_c.add_argument("--max_mismatches",
                           required=False,
                           type=int,
                           default=1,
@@ -80,11 +88,17 @@ def parse_args():
                           action='store_true',
                           dest='clear_after',
                           help='Specifies if the database files should be deleted after analysis.')
-    parser_c.add_argument('-o', '--output',
+    parser_c.add_argument('--output',
                           required=False,
                           type=str,
                           dest="output_file",
                           default="crispr_results.csv",
+                          help="Output file with final results.")
+    parser_c.add_argument('--num_threads',
+                          required=False,
+                          type=str,
+                          dest="num_threads",
+                          default=os.cpu_count(),
                           help="Output file with final results.")
 
     group_c = parser_c.add_mutually_exclusive_group()
@@ -97,7 +111,7 @@ def parse_args():
                             type=str,
                             dest='create_db_name',
                             help='Name for a new database that will be created.')
-    subgroup_c.add_argument("-vir", "--virus",
+    subgroup_c.add_argument("--virus",
                             type=str,
                             dest='virus_dir',
                             help='directory containing virus seq files.')
