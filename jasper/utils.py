@@ -1,6 +1,28 @@
 from pathlib import Path
 import json
 
+LOGO = r"""
+      _   _    ____  ____  _____ ____  
+     | | / \  / ___||  _ \| ____|  _ \ 
+  _  | |/ _ \ \___ \| |_) |  _| | |_) |
+ | |_| / ___ \ ___) |  __/| |___|  _ < 
+  \___/_/   \_\____/|_|   |_____|_| \_\    
+
+  ========================================
+
+            |-----------------|
+             \---------------/
+              ~-_---------_-~
+                ~-_---_-~
+                   ~-_
+                _-~---~-_
+              _-~---------~-_
+             /---------------\
+            |-----------------|                               
+"""
+
+TYPES = ('fasta', 'fa', 'fna')
+
 
 def chunks(lst: list, n: int):
     """Yield successive n-sized chunks from lst."""
@@ -11,6 +33,7 @@ def chunks(lst: list, n: int):
 def parse_config(config_path: str, default_config: dict) -> dict:
     try:
         with open(config_path, 'r') as fh:
-            return json.loads(fh)
-    except (FileNotFoundError, ValueError, TypeError):
+            return json.load(fh)
+    except (FileNotFoundError, ValueError, TypeError) as e:
+        print(e)
         return default_config

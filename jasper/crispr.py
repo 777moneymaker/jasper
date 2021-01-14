@@ -11,7 +11,7 @@ from Bio.Seq import Seq
 from Bio import SeqIO
 from jasper import database
 
-from jasper.database import TYPES
+from jasper import utils
 
 
 class CrisprFinder(database.Database):
@@ -25,7 +25,7 @@ class CrisprFinder(database.Database):
 
         start: float = time.time()
         for i, host in enumerate(self.source_dir.iterdir(), 1):
-            if not host.name.endswith(TYPES):
+            if not host.name.endswith(utils.TYPES):
                 continue
 
             # Remove this line. Only for tests.
@@ -66,6 +66,7 @@ class CrisprFinder(database.Database):
                 except (ValueError, IndexError):
                     continue
         end: float = time.time()
+        print()
         print(f"Crispr finding including repairment: {end - start :.2f}")
         return self
 

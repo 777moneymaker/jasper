@@ -3,6 +3,7 @@ from pathlib import Path
 from multiprocessing import Pool
 from jasper import database
 from jasper import crispr
+from jasper import trna
 from jasper import utils
 import time
 import shutil
@@ -12,25 +13,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-LOGO = r"""
-      _   _    ____  ____  _____ ____  
-     | | / \  / ___||  _ \| ____|  _ \ 
-  _  | |/ _ \ \___ \| |_) |  _| | |_) |
- | |_| / ___ \ ___) |  __/| |___|  _ < 
-  \___/_/   \_\____/|_|   |_____|_| \_\    
-  
-  ========================================
-  
-            |-----------------|
-             \---------------/
-              ~-_---------_-~
-                ~-_---_-~
-                   ~-_
-                _-~---~-_
-              _-~---------~-_
-             /---------------\
-            |-----------------|                               
-"""
+
 
 
 def parse_args():
@@ -67,16 +50,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    print(LOGO)
     args = parse_args()
-    args.mega_config = utils.parse_config(args.mega_config, {
-        "task": "megablast",
-        "evalue": 10,
-        "gapopen": 0,
-        "gapextend": 2,
-        "penalty": -2,
-        "word_size": 28,
-    })
     args.short_config = utils.parse_config(args.short_config, {
         "task": "blastn-short",
         "evalue": 1,
@@ -86,26 +60,17 @@ if __name__ == "__main__":
         "word_size": 7,
         "dust": "no",
     })
-    # db = database.Database(Path(args.host_dir), "my_db").create()
-    db = database.Database(Path("example_data/host"), "my_db").create()
-    # query_df = db.query_multiple(Path(args.virus_dir), config=args.mega_config)
-    query_df = db.query_multiple(Path("example_data/virus"), config=args.mega_config)
-    db.clear_files()
 
-    query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
-    mega_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]
-    genome_results = mega_results.sort_values(by="Score", ascending=False).reset_index(drop=True)
-    print("Megablast results (genome-genome query): ", genome_results, sep='\n')
 
     # crispr_finder = crispr.CrisprFinder(Path(args.host_dir), "NoName").retrieve_spacers()
-    crispr_finder = crispr.CrisprFinder(Path("example_data/host"), "NoName").retrieve_spacers()
+    crispr_finder = crispr.CrisprFinder(Path("example_data/host/"), "NoName").retrieve_spacers()
     # vir_db = database.Database(Path(args.virus_dir), "vir_db").create()
     vir_db = database.Database(Path("example_data/virus"), "vir_db").create()
 
-    short_results = vir_db.query_multiple(Path("crispr_spacers/"),
-                                          config=args.short_config,
-                                          blast_format="10 qseqid sseqid score qlen length mismatch gaps",
-                                          headers=["Spacer", "Virus", "Score", "Qlen", "Alen", "Mis", "Gap"])
+    short_results = vir_db.query(Path("crispr_spacers/"),
+                                 config=args.short_config,
+                                 blast_format="10 qseqid sseqid score qlen length mismatch gaps",
+                                 headers=["Spacer", "Virus", "Score", "Qlen", "Alen", "Mis", "Gap"])
     vir_db.clear_files()
     shutil.rmtree(Path("crispr_spacers/"))
 
@@ -124,3 +89,8 @@ if __name__ == "__main__":
     crispr_results = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
 
     print("blastn-short results (vir_genome-spacers query): ", crispr_results, sep='\n')
+
+# if __name__ == "__main__":
+#     trna_scanner = trna.tRNAScanner(Path("example_data/virus"), "no_name")
+#     results = trna_scanner.scan()
+#     print(results)

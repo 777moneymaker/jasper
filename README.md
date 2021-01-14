@@ -21,6 +21,8 @@ ATGCA....
 ```
 So even if you have, for instance, one genome in your file, then **Jasper** will change it's id to `<id from filename>|1`.
 
+**EXTENSIONS!** Jasper uses input files that ends with (fa, fna, fasta) only!
+
 ------------
 
 ### Python Libraries
@@ -49,12 +51,6 @@ tRNAscan-SE
 * To install PILER-CR go [here](http://www.drive5.com/pilercr/), dowload compiled software, move somwhere and add to `$PATH`.
 * To install tRNAscan-SE use `sudo apt install trnascan-se`
 
-By defaults, tRNAscan-SE install as `trnascan-1.4`. Be sure to use `trnascan` alias in your bash. To do it:
-```
-vim ~/.bashrc
-    alias trnascan="trnascan-1.4"
-source ~/.bashrc
-```
 
 After that go to JASPER's main directory and:
 ```
