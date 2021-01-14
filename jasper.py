@@ -14,7 +14,7 @@ def parse_args():
                                                 "performing genome-genome blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan."
                                            "Check my github @ github.com/777moneymaker",
-                                    usage="jasper.database [-h] -vir VIRUS_DIR [-c BLASTN_CONFIG] (--use_db USE_DB_NAME |  (--create_db CREATE_DB_NAME -hst HOST_DIR))")
+                                    usage="jasper.database [-h] -vir VIRUS_DIR [-c BLASTN_CONFIG] --use_db USE_DB_NAME |  (--create_db CREATE_DB_NAME -hst HOST_DIR)")
     parser_b._optionals.title = "arguments"
     parser_b.add_argument("-vir", "--virus",
                           required=True,
@@ -58,7 +58,7 @@ def parse_args():
                                                 "performing crispr spacers analysis. Vir_genome-spacer blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan."
                                            "Check my github @ github.com/777moneymaker",
-                                    usage="jasper.database [-h] -hst HOST_DIR [-c BLASTN_CONFIG] (--use_db USE_DB_NAME |  (--create_db CREATE_DB_NAME -vir VIRUS_DIR))")
+                                    usage="jasper.database [-h] -hst HOST_DIR [-c BLASTN_CONFIG] --use_db USE_DB_NAME |  (--create_db CREATE_DB_NAME -vir VIRUS_DIR)")
     parser_c._optionals.title = "arguments"
     parser_c.add_argument("-hst", "--host",
                           type=str,
