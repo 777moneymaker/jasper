@@ -1,5 +1,5 @@
-from pathlib import Path
 import json
+from shutil import which
 
 LOGO = r"""
       _   _    ____  ____  _____ ____  
@@ -35,5 +35,17 @@ def parse_config(config_path: str, default_config: dict) -> dict:
         with open(config_path, 'r') as fh:
             return json.load(fh)
     except (FileNotFoundError, ValueError, TypeError) as e:
-        print(e)
         return default_config
+
+
+def perform_tool_check(name: str):
+    """Check whether `name` is on PATH and marked as executable.
+
+    `name` is a tool which JASPER will use, for instance `blastn`.
+
+    Args:
+        name (str): Name of tool to perform check on.
+    Returns:
+        (bool): Value indicating whether tool exists in PATH or not.
+    """
+    return which(name) is not None
