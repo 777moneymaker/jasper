@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from jasper import database
+from jasper import blast
 
 
 class DataBaseTests(unittest.TestCase):

@@ -12,11 +12,11 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio import SeqIO
 
-from . import database
+from . import blast
 from . import utils
 
 
-class CrisprFinder(database.Database):
+class CrisprFinder(blast.Database):
     def __init__(self, source_dir: Path, name: str) -> None:
         super(CrisprFinder, self).__init__(source_dir, name)
 
@@ -89,10 +89,10 @@ def main(args):
     crispr_finder = CrisprFinder(Path(args.host_dir), "-").retrieve_spacers()
 
     if args.create_db_name:
-        vir_db, vir_db_output = database.Database(args.virus_dir, args.create_db_name).create()
+        vir_db, vir_db_output = blast.Database(args.virus_dir, args.create_db_name).create()
         print(vir_db_output)
     else:
-        vir_db = database.Database(Path('.'), args.use_db_name)
+        vir_db = blast.Database(Path('.'), args.use_db_name)
 
     print("Quering...")
     query_df = vir_db.query(Path("crispr_spacers/"),

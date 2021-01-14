@@ -1,12 +1,12 @@
 from pathlib import Path
 import subprocess
-from jasper import database
+from jasper import blast
 
 from Bio import SeqIO
 from jasper import utils
 
 
-class tRNAScanner(database.Database):
+class tRNAScanner(blast.Database):
     def __init__(self, source_dir: Path, name: str) -> None:
         super(tRNAScanner, self).__init__(source_dir, name)
 
