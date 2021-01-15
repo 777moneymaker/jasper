@@ -1,5 +1,4 @@
 import argparse
-import os
 
 
 def parse_args():
@@ -15,7 +14,7 @@ def parse_args():
                                                 "performing genome-genome blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper[.py] blast [-h] --virus VIRUS_DIR [--config BLASTN_CONFIG] --use_db "
+                                    usage="jasper-vh.py blast [-h] --virus VIRUS_DIR [--config BLASTN_CONFIG] --use_db "
                                           "USE_DB_NAME |  (--create_db CREATE_DB_NAME --host HOST_DIR)")
     parser_b._optionals.title = "arguments"
     parser_b.add_argument("--virus",
@@ -60,7 +59,7 @@ def parse_args():
                                                 "vir_genome-spacer blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper crispr[.py] [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use_db "
+                                    usage="jasper-vh.py [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use_db "
                                           "USE_DB_NAME |  (--create_db CREATE_DB_NAME --virus VIRUS_DIR)")
     parser_c._optionals.title = "arguments"
     parser_c.add_argument("--host",
@@ -108,6 +107,8 @@ def parse_args():
                                     description="JASPER is a program for prediction of virus's host. "
                                                 "This module is merging results from individual modules "
                                                 "and producing final output.",
+                                    usage="usage: jasper-vh.py merge [-h] [--weights WEIGHTS [WEIGHTS ...]] "
+                                          "[--output OUTPUT] files [files ...]",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker")
     parser_m.add_argument('files',
