@@ -6,7 +6,7 @@ with open("README.md") as fh:
 
 setup(
     name='jasper_vh',
-    version='1.0.0',
+    version='1.0.1',
     description="Just a simple virus's hosts predictor",
     long_description=description,
     long_description_content_type='text/markdown',
@@ -15,7 +15,7 @@ setup(
     license="GPLv3",
     author_email='milosz.chodkowski@student.put.poznan.pl',
     url="https://github.com/777moneymaker/jasper",
-    download_url="https://github.com/777moneymaker/jasper/archive/v1.0.0-beta.tar.gz",
+    download_url="https://github.com/777moneymaker/jasper/archive/v1.0.1-beta.tar.gz",
     packages=['jasper'],
     install_requires=[
         "biopython",
