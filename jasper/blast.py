@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """This module manages the blast operations.
 
 This module uses Biopython and NCBI-Blast+ for making local blast queries and parsing the output.

@@ -1,10 +1,11 @@
+#!/usr/bin/env python3
 from setuptools import setup
 
 with open("README.md") as fh:
     description = fh.read()
 
 setup(
-    name='jasper-vh',
+    name='jasper_vh',
     version='1.0.0',
     description="Just a simple virus's hosts predictor",
     long_description=description,
@@ -20,7 +21,7 @@ setup(
         "numpy",
         "pandas",
     ],
-    scripts=['jasper-vh.py'],
+    scripts=['jasper-vh'],
     classifiers=[
         "Development Status :: 4 - Beta",
         'Environment :: Console',

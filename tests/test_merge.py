@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import unittest
 import pandas as pd
 from pathlib import Path

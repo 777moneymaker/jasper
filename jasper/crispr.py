@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """This module manages the crispr parsing and analysis.
 
 This module uses Biopython and Piler-CR for identification of CRISPR spacers and their analysis.

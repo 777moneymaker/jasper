@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import subprocess
 import unittest
 from unittest.mock import Mock, patch

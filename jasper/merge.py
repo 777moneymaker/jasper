@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """This module manages the final merging of results from each single module."""
 
 import pandas as pd

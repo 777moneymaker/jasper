@@ -64,13 +64,13 @@ JASPER uses bunch of arguments. A lot of parameters are BLAST parameters and can
 
 ##### Basic usage
 ```
-jasper-vh.py blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir
-jasper-vh.py crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir
-jasper-vh.py trna --args # soon
-jasper-vh.py merge results1.csv results2.csv results3.csv [-w --weigths] 0.6 0.2 0.2 --output final_results.csv 
+jasper-vh blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir
+jasper-vh crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir
+jasper-vh trna --args # soon
+jasper-vh merge results1.csv results2.csv results3.csv [-w --weigths] 0.6 0.2 0.2 --output final_results.csv 
 ```
 
-For more check `--help` on jasper individual modules: `jasper-vh.py  {blast,crispr,trna,merge} --help`
+For more check `--help` on jasper individual modules: `jasper-vh  {blast,crispr,trna,merge} --help`
 
 ##### Blast config
 You can provide blast config as as a `*.json` file.
