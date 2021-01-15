@@ -89,3 +89,7 @@ jasper/__pycache__/
 *.nhr
 *.nin
 *.nsq
+
+# dist sh*T
+dist/
+jasper_vh.egg-info/
