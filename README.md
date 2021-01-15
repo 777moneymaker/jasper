@@ -58,6 +58,13 @@ After that go to JASPER's main directory and:
 ```
 python setup.py install
 ```
+
+or you can use pip `pip3 install jasper-vh` or `python -m pip install jasper-vh`.
+
+By defaults some pip on linux drops scripts to `~/local/bin`. Add it to your `$PATH` at the end.
+`export PATH="$HOME/.local/bin:$PATH"`
+Now you're done and you can start using `jasper-vh`.
+
 ## Tests
 If you want to test, go to proj directory and type `python -m unittest discover`.
 
