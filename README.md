@@ -3,7 +3,7 @@
 
 ------------
 
-![JASPER LOGO](https://github.com/777moneymaker/jasper/blob/main/logo.png)
+![JASPER LOGO](https://github.com/777moneymaker/jasper/blob/main/logo.png?raw=true)
 
 ------------
 
