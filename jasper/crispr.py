@@ -11,8 +11,8 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio import SeqIO
 
-from . import blast
-from . import utils
+from jasper import blast # change to .
+from jasper import utils # change to .
 
 
 class CrisprFinder(blast.Database):
@@ -30,7 +30,10 @@ class CrisprFinder(blast.Database):
         res_dir = Path("crispr_spacers")
         self._make_output_dir(res_dir)
 
+        i = 1 # REMOVE
         for host in self.source_dir.iterdir():
+            if i == 50: # REMOVE
+                break
             if not host.name.endswith(utils.TYPES):
                 continue
 
@@ -68,6 +71,7 @@ class CrisprFinder(blast.Database):
                             SeqIO.write(seq, final_fh, 'fasta')
                 except (ValueError, IndexError):
                     continue
+            i += 1 # REMOVE
         return self
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
@@ -124,15 +128,31 @@ def main(args):
     short_results = query_df.drop(columns=['Qlen', 'Alen', 'Mis', 'Gap'])
 
     short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index()
-    short_results.reindex(["Virus", "Spacer", "Score"], axis=1)
-    short_results["Spacer"] = short_results["Spacer"].map(lambda x: x.split("|")[0])
+    short_results.reindex(["Virus", "Host", "Score"], axis=1)
+    short_results["Host"] = short_results["Host"].map(lambda x: x.split("|")[0] + x.split("|")[1])
 
-    short_results = short_results.groupby(["Virus", "Spacer"]).sum().reset_index()
-    idx = short_results.groupby(['Virus'])['Score'].idxmax()
-    crispr_results: pd.DataFrame = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
+    # short_results = short_results.groupby(["Virus", "Spacer"]).sum().reset_index()
+    # idx = short_results.groupby(['Virus'])['Score'].idxmax()
+    # crispr_results: pd.DataFrame = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
     if args.clear_after:
         vir_db.clear_files()
-    print("blastn-short results (vir_genome-spacers query): ", crispr_results, sep='\n')
+    print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
 
-    crispr_results.to_csv(args.output_file, index=False)
+    short_results.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)
+
+
+class Expando(object):
+    pass
+
+
+if __name__ == '__main__':
+    args = Expando()
+    args.virus_dir = Path("example_data/virus")
+    args.host_dir = Path("example_data/host")
+    args.create_db_name = "vir_db"
+    args.short_config = ""
+    args.clear_after = True
+    args.output_file = "crispr_results.csv"
+    args.allowed_mis = 1
+    main(args)

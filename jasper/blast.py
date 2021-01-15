@@ -14,13 +14,12 @@ from __future__ import annotations
 import io
 import os
 import subprocess
-import argparse
 import pandas as pd
 from pathlib import Path
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 
-from . import utils
+from jasper import utils # change to .
 
 
 class Database:
@@ -75,11 +74,16 @@ class Database:
 
         if outfile.exists():
             outfile.unlink()
+
+        i = 1 # REMOVE
         for source_file in directory.iterdir():
+            if i == 25: # REMOVE
+                break
             if not source_file.name.endswith(utils.TYPES):
                 continue
             with open(outfile, 'a+') as fh:
                 fh.write(self._repair_fasta(source_file))
+            i += 1
         if os.path.getsize(outfile) == 0:
             raise ValueError("Blast input file is empty. Check your input.")
 
@@ -180,15 +184,27 @@ def main(args):
                         config=args.blastn_config)
 
     query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
-    mega_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]
-    genome_results: pd.DataFrame = mega_results.sort_values(by="Score", ascending=False).reset_index(drop=True)
-    print("Blastn results (genome-genome query): ", genome_results, sep='\n')
+    #mega_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]
+    #genome_results: pd.DataFrame = mega_results.sort_values(by="Score", ascending=False).reset_index(drop=True)
+    # genome_results: pd.DataFrame = query_df.groupby(["Virus", "Host"])
+    print("Blastn results (genome-genome query): ", query_df, sep='\n')
     if args.clear_after:
         db.clear_files()
 
-    genome_results.to_csv(args.output_file, index=False)
+    query_df.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)
 
 
+class Expando(object):
+    pass
+
+
 if __name__ == "__main__":
-    main()
+    args = Expando()
+    args.virus_dir = Path("example_data/virus")
+    args.host_dir = Path("example_data/host")
+    args.create_db_name = "host_db"
+    args.blastn_config = ""
+    args.clear_after = True
+    args.output_file = "blast_results.csv"
+    main(args)
