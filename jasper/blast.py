@@ -1,6 +1,6 @@
 """This module manages the blast operations.
 
-This module uses Biopython package for making local blast queries and parsing the output.
+This module uses Biopython and NCBI-Blast+ for making local blast queries and parsing the output.
 
 More about it:
     1. https://biopython.org/
@@ -24,7 +24,14 @@ from . import utils
 
 class Database:
     def __init__(self, source_dir: Path, name: str) -> None:
-        """Inits database with given name"""
+        """Inits database with given name
+        Args:
+            source_dir (Path): Path to directory containing host files.
+            name (str): Name of database.
+        Raises:
+            TypeError: When source_dir or path is not valid obj type
+            FileNotFoundError: When given path does not exist or is not a directory.
+        """
         if not isinstance(source_dir, Path):
             raise TypeError("Given object is not a Path object")
         if not isinstance(name, str):
@@ -40,6 +47,7 @@ class Database:
         """This function reads single fasta file and returns its content.
 
         Raises:
+            TypeError: When given file is of wrong type.
             FileNotFoundError: When given path is not file.
         Returns:
             (str): Repaired content of the file.
@@ -54,7 +62,7 @@ class Database:
         with open(file, 'r') as fh:
             for line in fh:
                 if line.startswith(">"):
-                    seq_id = f">{file.stem}|{contig}\n"
+                    seq_id = f">{file.stem}|{contig}\n"  # Read header
                     repaired_content.append(seq_id)
                     contig += 1
                 else:
@@ -62,7 +70,18 @@ class Database:
         return "".join(repaired_content)
 
     def _aggregate(self, directory: Path, outfile: Path):
-        """TODO"""
+        """This function aggregates every file in source directory.
+
+        Aggregated file consists of every repaired file in source dir.
+
+        Args:
+             directory (Path): Path to directory containing files.
+             outfile (Path): Name of the aggregation file to be created.
+        Raises:
+            TypeError: When given object is of wrong type.
+            FileNotFoundError: When given directory does not exist.
+            ValueError: When output file is empty.
+        """
         if not isinstance(directory, Path):
             raise TypeError("Given object is not Path object.")
         if not isinstance(outfile, Path):
@@ -81,17 +100,20 @@ class Database:
             with open(outfile, 'a+') as fh:
                 fh.write(self._repair_fasta(source_file))
 
-        if os.path.getsize(outfile) == 0:
+        if os.path.getsize(outfile) == 0:  # size == 0
             raise ValueError("Blast input file is empty. Check your input.")
 
     def create(self) -> tuple:
         """Function for making local blast database.
 
-        Returns:
-            (bool): Value indicating if database creation succeeded.
+        This function creates database from files found in source_dir.
 
+        Returns:
+            tuple(Database, str): Database object, output from makeblastdb.
         Creates:
             (*.nhr, *.nin, *.nsq): Created database's files in LMBD format.
+        Raises:
+            SubprocessError: When makeblastdb returns error or when input file does not exist.
         """
 
         self._aggregate(self.source_dir, Path("blast_input.fasta"))
@@ -117,7 +139,20 @@ class Database:
             return self, makeblastdb_output.stdout.decode()
 
     def query(self, query_dir: Path, config: dict, blast_format: str, headers: tuple) -> pd.DataFrame:
-        """TODO"""
+        """This function queries content of the directory to created database
+
+        Args:
+            query_dir (Path): Directory containing query files.
+            config (dict): Blast configuration dict.
+            blast_format (str): Blast output format.
+            headers ( tuple(*str) ): Headers matching blast output for final DataFrame.
+        Raises:
+            TypeError: When given obj is of wrong type.
+            FileNotFoundError: When given path does not exist or when given path is not a directory.
+            ValueError: When forbidden blast option was provided.
+        Returns:
+            (pd.DataFrame): Pandas DataFrame containing query results.
+        """
 
         if not isinstance(query_dir, Path):
             raise TypeError("Given object is not Path object")
@@ -140,6 +175,8 @@ class Database:
                                         max_target_seqs=1,
                                         **config)
             blastn_output = subprocess.run(str(cmd), capture_output=True, shell=True)
+
+            # Error only occurs if it's not this stupid warning.
             if blastn_output.stderr and "Examining 5 or more matches" not in blastn_output.stderr.decode():
                 if not Path("blast_query.fasta").exists():
                     raise subprocess.SubprocessError("Blastn returned error. Input file for Blastn does not exist. Check your input.", str(cmd))
@@ -154,15 +191,20 @@ class Database:
         return results_df
 
     def clear_files(self):
-        """TODO"""
+        """Function clears database files if any present."""
         for file in Path(".").iterdir():
             if file.stem == self.name and file.suffix in (".nhr", ".nin", ".nsq"):
                 file.unlink()
 
 
 def main(args):
-    """TODO"""
+    """Main function for running module.
+    Args:
+        args (argparse obj): Arguments from right subparser.
+    """
     print(utils.LOGO)
+
+    # Default config if not specified
     args.blastn_config = utils.parse_config(args.blastn_config, {
         "task": "blastn",
         "num_threads": os.cpu_count(),

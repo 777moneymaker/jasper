@@ -19,6 +19,16 @@ class MergeTests(unittest.TestCase):
         self.assertTrue(res[0].equals(pd.DataFrame({"T": [1, 2, 3], "Score": [2, 4, 6]})))
         self.assertTrue(res[1].equals(pd.DataFrame({"T": [1, 2, 3], "Score": [2, 4, 6]})))
 
+    def test_multiply_frames_wrong_types(self):
+        with self.assertRaises(TypeError):
+            merge.multiply_frames_by(1, 2)
+            merge.multiply_frames_by(pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}), 2)
+            merge.multiply_frames_by(4, pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}))
+            merge.multiply_frames_by(
+                [pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}), pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]})],
+                ['nan', 'nan']
+            )
+
     def test_merge_diff_args(self):
         args = Expando()
         args.files = ['test1', 'test2']

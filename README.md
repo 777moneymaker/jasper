@@ -54,8 +54,10 @@ Source code for additional software:
 
 After that go to JASPER's main directory and:
 ```
-python3 setup.py install
+python setup.py install
 ```
+## Tests
+If you want to test, go to proj directory and type `python -m unittest discover`.
 
 ## Usage
 JASPER uses bunch of arguments. A lot of parameters are BLAST parameters and can be configured with JSON file and passed to JASPER.
@@ -69,6 +71,11 @@ python3 jasper[.py] merge results1.csv results2.csv results3.csv [-w --weigths] 
 ```
 
 For more check `--help` on jasper individual modules: `python3 jasper[.py] {blast,crispr,trna,merge} --help`
+
+##### Blast config
+You can provide blast config as as a `*.json` file.
+Every module uses different task so there are few arguments that are forbidden:
+`[query', 'db', 'outfmt', 'max_target_seqs', 'num_alignments']`
 
 ## References
 * Edgar, R.C. (2007) [PILER-CR: fast and accurate identification of CRISPR repeats](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18

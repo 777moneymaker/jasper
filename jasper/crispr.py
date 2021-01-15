@@ -1,3 +1,15 @@
+"""This module manages the crispr parsing and analysis.
+
+This module uses Biopython and Piler-CR for identification of CRISPR spacers and their analysis.
+
+More about it:
+    1. https://biopython.org/
+
+    2. https://biopython.org/docs/dev/api/Bio.Blast.Applications.html
+
+    3. http://www.ncbi.nlm.nih.gov/pubmed/17239253
+"""
+
 from __future__ import annotations
 
 import os
@@ -5,7 +17,6 @@ import shutil
 import subprocess
 import pandas as pd
 from pathlib import Path
-
 
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
@@ -17,9 +28,17 @@ from . import utils
 
 class CrisprFinder(blast.Database):
     def __init__(self, source_dir: Path, name: str) -> None:
+        """Inits obj with args"""
         super(CrisprFinder, self).__init__(source_dir, name)
 
     def _make_output_dir(self, directory: Path):
+        """This function creates output dir for PILER-CR
+
+        Args:
+            directory (Path): Directory to be created.
+        Raises:
+            TypeError: When given path is not Path obj.
+        """
         if not isinstance(directory, Path):
             raise TypeError("Given object is not Path object.")
 
@@ -27,6 +46,13 @@ class CrisprFinder(blast.Database):
             directory.mkdir()
 
     def retrieve_spacers(self) -> CrisprFinder:
+        """This function retrieves spacers from files in source directory
+
+        This method uses blast module functionality.
+        It runs PILER-CR and parses output for each file in source dir.
+        Then it creates a virus database and uses retrieved spacers as a blastn-short query.
+        Resulting dataframe is populated with blast query results.
+        """
         res_dir = Path("crispr_spacers")
         self._make_output_dir(res_dir)
 
@@ -71,6 +97,16 @@ class CrisprFinder(blast.Database):
         return self
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
+        """This function runs PILER-CR for a given host file and produces output to given file
+
+        Args:
+            host_file (Path): Host file to be passed as PILER input.
+            out_file (Path): Output file to be created by PILER.
+        Raises:
+            TypeError: When given obj is of wrong type.
+            FileNotFoundError: When given host_file is not file or doesn't exist.
+            SubprocessError: When PILER-CR returned error.
+        """
         if not isinstance(host_file, Path):
             raise TypeError("Given file is not Path obj.")
         if not isinstance(out_file, Path):
@@ -81,12 +117,16 @@ class CrisprFinder(blast.Database):
             raise FileNotFoundError("Given file is not a file.")
 
         try:
-            return subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
             raise subprocess.SubprocessError("PilerCR returned error. Check your input", e.output)
 
 
 def main(args):
+    """Main function for running module.
+    Args:
+        args (argparse obj): Arguments from right subparser.
+    """
     print(utils.LOGO)
     args.short_config = utils.parse_config(args.short_config, {
         "task": "blastn-short",
