@@ -66,3 +66,7 @@ class BlastTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             finder = crispr.CrisprFinder(source_dir=self.test_dir / Path("data/fasta_test_data"), name="test_db")
             finder.find_crispr_spacers(Path("not_existing_file"), self.test_dir / Path("piler_output"))
+
+
+if __name__ == '__main__':
+    unittest.main()

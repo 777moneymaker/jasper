@@ -19,7 +19,7 @@ from pathlib import Path
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 
-from jasper import utils # change to .
+from . import utils
 
 
 class Database:
@@ -75,15 +75,12 @@ class Database:
         if outfile.exists():
             outfile.unlink()
 
-        i = 1 # REMOVE
         for source_file in directory.iterdir():
-            if i == 25: # REMOVE
-                break
             if not source_file.name.endswith(utils.TYPES):
                 continue
             with open(outfile, 'a+') as fh:
                 fh.write(self._repair_fasta(source_file))
-            i += 1
+
         if os.path.getsize(outfile) == 0:
             raise ValueError("Blast input file is empty. Check your input.")
 
@@ -182,14 +179,11 @@ def main(args):
                         blast_format="10 qseqid sseqid score",
                         headers=("Virus", "Host", "Score"),
                         config=args.blastn_config)
-
-    query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
-    #mega_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]
-    #genome_results: pd.DataFrame = mega_results.sort_values(by="Score", ascending=False).reset_index(drop=True)
-    # genome_results: pd.DataFrame = query_df.groupby(["Virus", "Host"])
-    print("Blastn results (genome-genome query): ", query_df, sep='\n')
     if args.clear_after:
         db.clear_files()
+
+    query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
+    print("Blastn results (genome-genome query): ", query_df, sep='\n')
 
     query_df.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)

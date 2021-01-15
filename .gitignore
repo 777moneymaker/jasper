@@ -90,3 +90,6 @@ jasper/__pycache__/
 *.nin
 *.nsq
 
+# temp
+jasper/trna.py
+

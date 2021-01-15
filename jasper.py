@@ -39,20 +39,19 @@ def parse_args():
                           default="blast_results.csv",
                           help="Output file with final results.")
 
-
     group_b = parser_b.add_argument_group()
     group_b.add_argument("--use_db",
                          type=str,
                          dest='use_db_name',
                          help='Name for a existing database that will be used.')
     group_b.add_argument("--create_db",
-                            type=str,
-                            dest='create_db_name',
-                            help='Name for a new database that will be created.')
+                         type=str,
+                         dest='create_db_name',
+                         help='Name for a new database that will be created.')
     group_b.add_argument("--host",
-                            type=str,
-                            dest='host_dir',
-                            help='directory containing host seq files.')
+                         type=str,
+                         dest='host_dir',
+                         help='directory containing host seq files.')
 
     # Crispr parser
     parser_c = subparser.add_parser(name='crispr',
@@ -97,13 +96,37 @@ def parse_args():
                          dest='use_db_name',
                          help='Name for a existing database that will be used.')
     group_c.add_argument("--create_db",
-                            type=str,
-                            dest='create_db_name',
-                            help='Name for a new database that will be created.')
+                         type=str,
+                         dest='create_db_name',
+                         help='Name for a new database that will be created.')
     group_c.add_argument("--virus",
-                            type=str,
-                            dest='virus_dir',
-                            help='directory containing virus seq files.')
+                         type=str,
+                         dest='virus_dir',
+                         help='directory containing virus seq files.')
+
+    parser_m = subparser.add_parser(name='merge',
+                                    description="JASPER is a program for prediction of virus's host. "
+                                                "This module is merging results from individual modules "
+                                                "and producing final output.",
+                                    epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
+                                           "Check my github: github.com/777moneymaker")
+    parser_m.add_argument('files',
+                          nargs='+',
+                          type=str,
+                          help="Files to be merged")
+    parser_m.add_argument('--weights',
+                          required=False,
+                          nargs='+',
+                          type=float,
+                          default=[.6, .4, .4],
+                          dest="weights",
+                          help="Files to be merged")
+    parser_m.add_argument('--output',
+                          required=False,
+                          type=str,
+                          default="merged_jasper_results.csv",
+                          dest="output",
+                          help="Files to be merged")
 
     args = parser.parse_args()
     if args.subparser_name == 'blast':
@@ -129,3 +152,7 @@ if __name__ == '__main__':
     elif subparser_name == 'crispr':
         from jasper import crispr
         crispr.main(args)
+    elif subparser_name == 'merge':
+        from jasper import merge
+        merge.main(args)
+        print("Saved final results to", args.output)

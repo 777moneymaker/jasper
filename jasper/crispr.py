@@ -11,8 +11,8 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio import SeqIO
 
-from jasper import blast # change to .
-from jasper import utils # change to .
+from . import blast
+from . import utils
 
 
 class CrisprFinder(blast.Database):
@@ -30,10 +30,7 @@ class CrisprFinder(blast.Database):
         res_dir = Path("crispr_spacers")
         self._make_output_dir(res_dir)
 
-        i = 1 # REMOVE
         for host in self.source_dir.iterdir():
-            if i == 50: # REMOVE
-                break
             if not host.name.endswith(utils.TYPES):
                 continue
 
@@ -42,7 +39,7 @@ class CrisprFinder(blast.Database):
                 repaired_fh.write(self._repair_fasta(host))
 
             piler_file = res_dir / Path(f"{host.stem}.piler")  # Output file for PILERCR.
-            piler_output = self.find_crispr_spacers(repaired_file, piler_file)  # Find crispr spacers for given file.
+            self.find_crispr_spacers(repaired_file, piler_file)  # Find crispr spacers for given file.
             repaired_file.unlink()  # Remove temp file for repaired seq
 
             # Process the PILERCR output
@@ -71,7 +68,6 @@ class CrisprFinder(blast.Database):
                             SeqIO.write(seq, final_fh, 'fasta')
                 except (ValueError, IndexError):
                     continue
-            i += 1 # REMOVE
         return self
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
@@ -119,6 +115,8 @@ def main(args):
                             config=args.short_config,
                             blast_format="10 qseqid sseqid score qlen length mismatch gaps",
                             headers=("Spacer", "Virus", "Score", "Qlen", "Alen", "Mis", "Gap"))
+    if args.clear_after:
+        vir_db.clear_files()
     shutil.rmtree(Path("crispr_spacers/"))
 
     query_df[["Score", "Qlen", "Alen", "Mis", "Gap"]].apply(pd.to_numeric)
@@ -126,16 +124,17 @@ def main(args):
             query_df['Alen'] - query_df['Mis'] - query_df['Gap'])
     query_df['Allowed'] = query_df['Allowed'].apply(pd.to_numeric)
     short_results = query_df.drop(columns=['Qlen', 'Alen', 'Mis', 'Gap'])
+    short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index(drop=True)
 
-    short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index()
-    short_results.reindex(["Virus", "Host", "Score"], axis=1)
-    short_results["Host"] = short_results["Host"].map(lambda x: x.split("|")[0] + x.split("|")[1])
+    short_results.rename(columns={"Spacer": "Host"}, inplace=True)
+    short_results = short_results.reindex(["Virus", "Host", "Score"], axis=1)
+    short_results["Host"] = short_results["Host"].map(lambda x: "|".join(x.split("|")[:2]))
+    short_results = short_results.reset_index(drop=True)
 
     # short_results = short_results.groupby(["Virus", "Spacer"]).sum().reset_index()
     # idx = short_results.groupby(['Virus'])['Score'].idxmax()
     # crispr_results: pd.DataFrame = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
-    if args.clear_after:
-        vir_db.clear_files()
+
     print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
 
     short_results.to_csv(args.output_file, index=False)

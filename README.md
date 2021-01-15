@@ -1,11 +1,11 @@
 # JASPER
 ![JASPER LOGO](https://github.com/777moneymaker/jasper/blob/main/logo.png)
-JASPER is a free bioinformatics tools for predicting virus hosts. 
 
 ------------
 
-Jasper uses a bunch of bioinformatics tools to prediction virus hosts. It includes genome-genome alignment, CRISPR spacers analyzation, tRNA analyzation and more.
-
+JASPER is a free bioinformatics tools for predicting virus hosts. 
+JASPER uses a bunch of bioinformatics tools to prediction virus hosts. It includes genome-genome alignment, CRISPR spacers analyzation, tRNA analyzation and more.
+JASPER contains few, independent modules `blast`, `crispr`, `trna - not included now`, `merge`.
 
 ## Requirements
 ### Naming convention
@@ -25,32 +25,30 @@ So even if you have, for instance, one genome in your file, then **Jasper** will
 
 ------------
 
-### Python Libraries
-```
-Biopython
-Numpy
-Pandas
-Pytz
-Six
-```
 ### Additional software
 ```
 NCBI-Blast+
 PILER-CR
-tRNAscan-SE
+tRNAscan-SE # not included in current release
 ```
 ## Installation
 ##### *I will make a simple installation script in my free time.*
 
 ------------
 
-
 **JASPER** uses additional software. It calls every program with `subprocess` so every program that is stated in above should be installed and added to `$PATH`. 
 
+On Ubuntu:
 * To install NCBI-Blast+ use `sudo apt install ncbi-blast+`
-* To install PILER-CR go [here](http://www.drive5.com/pilercr/), dowload compiled software, move somwhere and add to `$PATH`.
+* To install PILER-CR go [here](http://www.drive5.com/pilercr/), dowload compiled software, move somwhere and add to `$PATH` under name `pilercr`.
 * To install tRNAscan-SE use `sudo apt install trnascan-se`
 
+Source code for additional software:
+* NCBI-Blast+: [here](https://www.ncbi.nlm.nih.gov/books/NBK279671/)
+* PILER-CR [here](http://www.drive5.com/pilercr/)
+* tRNAscan-SE [here](http://lowelab.ucsc.edu/tRNAscan-SE/)
+
+**Remember to install everything and add it to path**
 
 After that go to JASPER's main directory and:
 ```
@@ -62,14 +60,13 @@ JASPER uses bunch of arguments. A lot of parameters are BLAST parameters and can
 
 ##### Basic usage
 ```
-jasper --virus path/to/virus/dir --host /path/to/host/dir
+python3 jasper[.py] blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir
+python3 jasper[.py] crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir
+python3 jasper[.py] trna --args # soon
+python3 jasper[.py] merge results1.csv results2.csv results3.csv [-w --weigths] 0.6 0.2 0.2 --output final_results.csv 
 ```
 
-##### Advanced usage
-```
-TODO
-```
-
+For more check `--help` on jasper individual modules: `python3 jasper[.py] {blast,crispr,trna,merge} --help`
 
 ## References
 * Edgar, R.C. (2007) [PILER-CR: fast and accurate identification of CRISPR repeats](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18
@@ -77,4 +74,4 @@ TODO
 * [NCBI-BLAST+](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
