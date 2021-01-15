@@ -11,6 +11,8 @@ JASPER contains few, independent modules `blast`, `crispr`, `trna - not included
 ### Naming convention
 **Jasper** depends on good file naming convention. The best is to use sequence ID as file name, e.x. `NC_008876.fna`. Software will use this id to name every temp file that needs to be created and also it will use this ID in results file.
 
+**WARNING** It's not the best idea to use `|` char in your filename and also in sequence header. Just use normal fasta naming like `>NC_00876 additional_info more_additional_info`.
+
 If you put multiple contigs in a single file, there is no problem with that. Just be sure that every contig is in it's right file. **Jasper** repairs every file it read, by default naming it `<id from filename>|<#contig>` e.x.:
 ```
 >NC_000856|1
