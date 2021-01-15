@@ -57,15 +57,20 @@ class Database:
                     repaired_content.append(line)
         return "".join(repaired_content)
 
-    def _aggregate(self):
-        if Path('blast_input.fasta').exists():
-            Path('blast_input.fasta').unlink()
-        for source_file in self.source_dir.iterdir():
+    def _aggregate(self, directory: Path, outfile: Path):
+        if not directory.exists():
+            raise FileNotFoundError('Given path does not exist.')
+        if not directory.is_dir():
+            raise FileNotFoundError('Given path is not a directory.')
+
+        if outfile.exists():
+            outfile.unlink()
+        for source_file in directory.iterdir():
             if not source_file.name.endswith(utils.TYPES):
                 continue
-            with open('blast_input.fasta', 'a+') as fh:
+            with open(outfile, 'a+') as fh:
                 fh.write(self._repair_fasta(source_file))
-        if os.path.getsize('blast_input.fasta') == 0:
+        if os.path.getsize(outfile) == 0:
             raise ValueError("Blast input file is empty. Check your input.")
 
     def create(self) -> tuple:
@@ -78,7 +83,7 @@ class Database:
             (*.nhr, *.nin, *.nsq): Created database's files in LMBD format.
         """
 
-        self._aggregate()
+        self._aggregate(self.source_dir, Path("blast_input.fasta"))
         try:
             cmd = NcbimakeblastdbCommandline(input_file="blast_input.fasta",
                                              dbtype="nucl",
@@ -105,16 +110,7 @@ class Database:
               blast_format: str = "10 qseqid sseqid score") -> pd.DataFrame:
         """TODO"""
 
-        if not query_dir.is_dir():
-            raise FileNotFoundError('Given path is not a directory.')
-
-        if Path("blast_query.fasta").exists():
-            Path("blast_query.fasta").unlink()
-        for query_file in query_dir.iterdir():
-            with open('blast_query.fasta', 'a+') as fh:
-                if not query_file.name.endswith(utils.TYPES):
-                    continue
-                fh.write(self._repair_fasta(query_file))  # Repair target seq
+        self._aggregate(query_dir, Path("blast_query.fasta"))
         try:
             cmd = NcbiblastnCommandline(query="blast_query.fasta",
                                         db=f"{self.name}",
