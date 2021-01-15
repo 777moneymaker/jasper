@@ -26,6 +26,10 @@ from . import utils
 class Database:
     def __init__(self, source_dir: Path, name: str) -> None:
         """Inits database with given name"""
+        if not isinstance(source_dir, Path):
+            raise TypeError("Given object is not a Path object")
+        if not isinstance(name, str):
+            raise TypeError(f"Name expected to be str")
         if not Path(source_dir).exists():
             raise FileNotFoundError("Given path does not exist.")
         if not Path(source_dir).is_dir():
@@ -41,7 +45,8 @@ class Database:
         Returns:
             (str): Repaired content of the file.
         """
-
+        if not isinstance(file, Path):
+            raise TypeError("File is not a Path object.")
         if not file.is_file():
             raise FileNotFoundError("Given path is not a file.")
 
@@ -58,6 +63,11 @@ class Database:
         return "".join(repaired_content)
 
     def _aggregate(self, directory: Path, outfile: Path):
+        """TODO"""
+        if not isinstance(directory, Path):
+            raise TypeError("Given object is not Path object.")
+        if not isinstance(outfile, Path):
+            raise TypeError("Given object is not Path object.")
         if not directory.exists():
             raise FileNotFoundError('Given path does not exist.')
         if not directory.is_dir():
@@ -105,17 +115,27 @@ class Database:
                 Path("blast_input.fasta").unlink()
             return self, makeblastdb_output.stdout.decode()
 
-    def query(self, query_dir: Path, num_threads: int, config: dict,
-              headers=("Virus", "Host", "Score"),
-              blast_format: str = "10 qseqid sseqid score") -> pd.DataFrame:
+    def query(self, query_dir: Path, config: dict, blast_format: str, headers: tuple) -> pd.DataFrame:
         """TODO"""
+
+        if not isinstance(query_dir, Path):
+            raise TypeError("Given object is not Path object")
+        if not query_dir.exists():
+            raise FileNotFoundError("Given path does not exist")
+        if not query_dir.is_dir():
+            raise FileNotFoundError("Given path is not directory")
+
+        if not isinstance(config, dict):
+            raise TypeError("Config file is not a dict object")
+        if any(kwarg in ('query', 'db', 'outfmt', 'max_target_seqs', 'num_alignments') for kwarg in config.keys()):
+            used = filter(lambda k: k in config.keys(), ('query', 'db', 'outfmt', 'max_target_seqs', 'num_alignments'))
+            raise ValueError("Given kwargs are not valid in terms of blast usage", list(used))
 
         self._aggregate(query_dir, Path("blast_query.fasta"))
         try:
             cmd = NcbiblastnCommandline(query="blast_query.fasta",
                                         db=f"{self.name}",
                                         outfmt=blast_format,
-                                        num_threads=num_threads,
                                         max_target_seqs=1,
                                         **config)
             blastn_output = subprocess.run(str(cmd), capture_output=True, shell=True)
@@ -133,15 +153,18 @@ class Database:
         return results_df
 
     def clear_files(self):
+        """TODO"""
         for file in Path(".").iterdir():
             if file.stem == self.name and file.suffix in (".nhr", ".nin", ".nsq"):
                 file.unlink()
 
 
 def main(args):
+    """TODO"""
     print(utils.LOGO)
     args.blastn_config = utils.parse_config(args.blastn_config, {
         "task": "blastn",
+        "num_threads": os.cpu_count(),
     })
     print("Starting analysis...")
     if args.create_db_name:
@@ -151,7 +174,10 @@ def main(args):
     else:
         db = Database(Path('.'), args.use_db_name)
     print("Quering...")
-    query_df = db.query(Path(args.virus_dir), num_threads=args.num_threads, config=args.blastn_config)
+    query_df = db.query(Path(args.virus_dir),
+                        blast_format="10 qseqid sseqid score",
+                        headers=("Virus", "Host", "Score"),
+                        config=args.blastn_config)
 
     query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
     mega_results = query_df.loc[query_df.reset_index().groupby(['Virus'])['Score'].idxmax()]
@@ -162,3 +188,7 @@ def main(args):
 
     genome_results.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import pandas as pd
@@ -19,6 +20,9 @@ class CrisprFinder(blast.Database):
         super(CrisprFinder, self).__init__(source_dir, name)
 
     def _make_output_dir(self, directory: Path):
+        if not isinstance(directory, Path):
+            raise TypeError("Given object is not Path object.")
+
         if not directory.exists():
             directory.mkdir()
 
@@ -67,6 +71,15 @@ class CrisprFinder(blast.Database):
         return self
 
     def find_crispr_spacers(self, host_file: Path, out_file: Path):
+        if not isinstance(host_file, Path):
+            raise TypeError("Given file is not Path obj.")
+        if not isinstance(out_file, Path):
+            raise TypeError("Given outfile is not a Path obj.")
+        if not host_file.exists():
+            raise FileNotFoundError("Host file does not exist.")
+        if not host_file.is_file():
+            raise FileNotFoundError("Given file is not a file.")
+
         try:
             return subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
@@ -77,6 +90,7 @@ def main(args):
     print(utils.LOGO)
     args.short_config = utils.parse_config(args.short_config, {
         "task": "blastn-short",
+        "num_threads": os.cpu_count(),
         "evalue": 1,
         "gapopen": 10,
         "gapextend": 2,
@@ -87,7 +101,8 @@ def main(args):
 
     print("Starting analysis...")
     print("Aggregating files, retrieving crispr spacers...")
-    crispr_finder = CrisprFinder(Path(args.host_dir), "-").retrieve_spacers()
+    finder = CrisprFinder(Path(args.host_dir), "-")
+    finder.retrieve_spacers()
 
     if args.create_db_name:
         vir_db, vir_db_output = blast.Database(args.virus_dir, args.create_db_name).create()
@@ -98,9 +113,8 @@ def main(args):
     print("Quering...")
     query_df = vir_db.query(Path("crispr_spacers/"),
                             config=args.short_config,
-                            num_threads=args.num_threads,
                             blast_format="10 qseqid sseqid score qlen length mismatch gaps",
-                            headers=["Spacer", "Virus", "Score", "Qlen", "Alen", "Mis", "Gap"])
+                            headers=("Spacer", "Virus", "Score", "Qlen", "Alen", "Mis", "Gap"))
     shutil.rmtree(Path("crispr_spacers/"))
 
     query_df[["Score", "Qlen", "Alen", "Mis", "Gap"]].apply(pd.to_numeric)
