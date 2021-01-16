@@ -146,7 +146,7 @@ def main(args):
     finder.retrieve_spacers()
 
     if args.create_db_name:
-        vir_db, vir_db_output = blast.Database(args.virus_dir, args.create_db_name).create()
+        vir_db, vir_db_output = blast.Database(Path(args.virus_dir), args.create_db_name).create()
         print(vir_db_output)
     else:
         vir_db = blast.Database(Path('.'), args.use_db_name)
