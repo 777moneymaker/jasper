@@ -5,6 +5,7 @@ from pathlib import Path
 
 from Bio import SeqIO
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
+
 from jasper import blast
 from jasper import utils
 
@@ -69,12 +70,13 @@ class tRNAScanner(blast.Database):
         else:
             mode = "-G"
 
-        res = subprocess.run(['tRNAscan-SE', str(file), '-a', str(out_file), '--thread', str(num_threads), mode], capture_output=True)
+        res = subprocess.run(['tRNAscan-SE', str(file), '-a', str(out_file), '--thread', str(num_threads), mode],
+                             capture_output=True)
         return res
 
 
 if __name__ == '__main__':
     t = tRNAScanner(source_dir=Path("example_data/host"), target_dir=Path("example_data/virus"), name="trna_db")
-    #host_trnas = t.scan(t.source_dir, Path("host_trnas.fasta"))
+    # host_trnas = t.scan(t.source_dir, Path("host_trnas.fasta"))
     vir_trnas = t.scan(t.target_dir, Path("virus_trnas.fasta"), mode='general')
     print(*vir_trnas, sep='\n')

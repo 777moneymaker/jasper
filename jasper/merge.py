@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """This module manages the final merging of results from each single module."""
 
-import pandas as pd
-from itertools import chain
 import numbers
+from itertools import chain
+
+import pandas as pd
 
 
 def multiply_frames_by(frames: list, weights: list):

@@ -16,12 +16,12 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
-import pandas as pd
 from pathlib import Path
 
-from Bio.SeqRecord import SeqRecord
-from Bio.Seq import Seq
+import pandas as pd
 from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 from . import blast
 from . import utils
@@ -118,7 +118,8 @@ class CrisprFinder(blast.Database):
             raise FileNotFoundError("Given file is not a file.")
 
         try:
-            subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)], stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
             raise subprocess.SubprocessError("PilerCR returned error. Check your input", e.output)
 
@@ -165,7 +166,8 @@ def main(args):
             query_df['Alen'] - query_df['Mis'] - query_df['Gap'])
     query_df['Allowed'] = query_df['Allowed'].apply(pd.to_numeric)
     short_results = query_df.drop(columns=['Qlen', 'Alen', 'Mis', 'Gap'])
-    short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index(drop=True)
+    short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index(
+        drop=True)
 
     short_results.rename(columns={"Spacer": "Host"}, inplace=True)
     short_results = short_results.reindex(["Virus", "Host", "Score"], axis=1)
@@ -176,7 +178,7 @@ def main(args):
     # idx = short_results.groupby(['Virus'])['Score'].idxmax()
     # crispr_results: pd.DataFrame = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
 
-    print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
+    # print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
 
     short_results.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)

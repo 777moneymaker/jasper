@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 
 
 def parse_args():
@@ -60,7 +61,7 @@ def parse_args():
                                                 "vir_genome-spacer blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper-vh [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use_db "
+                                    usage="jasper-vh crispr [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use_db "
                                           "USE_DB_NAME |  (--create_db CREATE_DB_NAME --virus VIRUS_DIR)")
     parser_c._optionals.title = "arguments"
     parser_c.add_argument("--host",
@@ -104,6 +105,7 @@ def parse_args():
                          dest='virus_dir',
                          help='directory containing virus seq files.')
 
+    # Merge parser
     parser_m = subparser.add_parser(name='merge',
                                     description="JASPER is a program for prediction of virus's host. "
                                                 "This module is merging results from individual modules "
@@ -130,6 +132,45 @@ def parse_args():
                           dest="output",
                           help="Files to be merged")
 
+    # afree parser
+    parser_a = subparser.add_parser(name='afree',
+                                    description="JASPER is a program for prediction of virus's host. This module is "
+                                                "performing alignment-free analysis.",
+                                    epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
+                                           "Check my github: github.com/777moneymaker")
+    parser_a._optionals.title = "arguments"
+    parser_a.add_argument("--host-dir",
+                          type=str,
+                          required=False,
+                          dest='host_dir',
+                          help='directory containing host seq files.')
+    parser_a.add_argument("--virus-dir",
+                          type=str,
+                          required=True,
+                          dest='virus_dir',
+                          help='directory containing virus seq files.')
+    parser_a.add_argument("--results-file",
+                          type=str,
+                          required=True,
+                          dest='results_file',
+                          help='directory for results files.')
+    parser_a.add_argument("--num_threads",
+                          type=int,
+                          required=False,
+                          default=os.cpu_count(),
+                          dest='threads',
+                          help='number of threads')
+    parser_a.add_argument("--use-model",
+                          required=False,
+                          type=str,
+                          dest='model_dir',
+                          help='pre=computed model')
+    parser_a.add_argument("--clear-after",
+                          required=False,
+                          action="store_true",
+                          dest='clear_after',
+                          help='if temporary file should be deleted. Can be re-used')
+
     args = parser.parse_args()
     if args.subparser_name == 'blast':
         if args.use_db_name and any([args.create_db_name, args.host_dir]):
@@ -142,6 +183,13 @@ def parse_args():
             parser.error("Mutually exclusive argument groups were used. Check usage.")
         if not args.use_db_name and not all([args.create_db_name, args.virus_dir]):
             parser.error("You must specify database name and a virus files directory. Check usage.")
+
+    if args.subparser_name == 'afree':
+        if args.host_dir and args.model_dir:
+            parser.error("You can't specify host dir for model creation if model is present.")
+        if not any([args.host_dir, args.model_dir]):
+            parser.error("You must specify model or host directory for model creation.")
+
     return args
 
 
@@ -158,3 +206,6 @@ if __name__ == '__main__':
         from jasper import merge
         merge.main(args)
         print("Saved final results to", args.output)
+    elif subparser_name == 'afree':
+        from jasper import afree
+        afree.main(args)

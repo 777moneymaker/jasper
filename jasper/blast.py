@@ -15,8 +15,9 @@ from __future__ import annotations
 import io
 import os
 import subprocess
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 
@@ -180,9 +181,11 @@ class Database:
             # Error only occurs if it's not this stupid warning.
             if blastn_output.stderr and "Examining 5 or more matches" not in blastn_output.stderr.decode():
                 if not Path("blast_query.fasta").exists():
-                    raise subprocess.SubprocessError("Blastn returned error. Input file for Blastn does not exist. Check your input.", str(cmd))
+                    raise subprocess.SubprocessError(
+                        "Blastn returned error. Input file for Blastn does not exist. Check your input.", str(cmd))
                 else:
-                    raise subprocess.SubprocessError("Blastn returned error. Check your input.", blastn_output.stderr.decode())
+                    raise subprocess.SubprocessError("Blastn returned error. Check your input.",
+                                                     blastn_output.stderr.decode())
         except Exception:
             raise
         finally:
