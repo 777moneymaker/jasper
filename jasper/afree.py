@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 from Bio import SeqIO
 
 from . import utils
@@ -97,29 +98,36 @@ class Wish:
         if output.stderr.decode():
             raise subprocess.SubprocessError(output.stderr.decode())
 
-        df = pd.read_csv(output_dir / Path("prediction.list"),
-                         sep=None, engine='python').iloc[:, 0:3]
-        df.columns = pd.Index(['Virus', 'Host', 'Log'])
+        df = pd.read_csv(output_dir / Path("llikelihood.matrix"),
+                         sep=None, engine='python', index_col=0)
         return df
 
 
 def main(args):
     print(utils.LOGO)
+    if args.host_dir is None:
+        args.host_dir = "."
+
     w = Wish(Path(args.host_dir), Path(args.virus_dir))
 
     if not args.model_dir:
         print("Building model...")
         w.build(threads=args.threads)
-        print('Done.')
+        print('Done.', end='\n\n')
 
     print("Predicting...")
     if args.model_dir:
         df = w.predict(model_dir=Path(args.model_dir), threads=args.threads)
     else:
         df = w.predict(threads=args.threads)
-    df.to_csv(Path(args.results_file), index=False)
-    print("Done.")
     shutil.rmtree(Path("temp_output_dir"))
+
+    tuplz = df.stack().reset_index().agg(tuple, 1).to_list()
+    final_df = pd.DataFrame(tuplz, columns=['Host', 'Virus', 'Score'])
+    final_df = final_df.reindex(['Virus', 'Host', 'Score'], axis=1)
+    final_df.to_csv(Path(args.results_file), index=False)
+    print("Done.")
+    print(final_df)
 
     if args.clear_after:
         shutil.rmtree(Path("temp_model_dir"))

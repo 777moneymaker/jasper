@@ -178,7 +178,7 @@ def main(args):
     # idx = short_results.groupby(['Virus'])['Score'].idxmax()
     # crispr_results: pd.DataFrame = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
 
-    # print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
+    print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
 
     short_results.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)

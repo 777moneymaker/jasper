@@ -174,7 +174,6 @@ class Database:
             cmd = NcbiblastnCommandline(query="blast_query.fasta",
                                         db=f"{self.name}",
                                         outfmt=blast_format,
-                                        max_target_seqs=1,
                                         **config)
             blastn_output = subprocess.run(str(cmd), capture_output=True, shell=True)
 

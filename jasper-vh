@@ -16,8 +16,8 @@ def parse_args():
                                                 "performing genome-genome blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper-vh blast [-h] --virus VIRUS_DIR [--config BLASTN_CONFIG] --use_db "
-                                          "USE_DB_NAME |  (--create_db CREATE_DB_NAME --host HOST_DIR)")
+                                    usage="jasper-vh blast [-h] --virus VIRUS_DIR [--config BLASTN_CONFIG] --use-db "
+                                          "USE_DB_NAME |  (--create-db CREATE_DB_NAME --host HOST_DIR)")
     parser_b._optionals.title = "arguments"
     parser_b.add_argument("--virus",
                           required=True,
@@ -41,11 +41,11 @@ def parse_args():
                           help="Output file with final results.")
 
     group_b = parser_b.add_argument_group()
-    group_b.add_argument("--use_db",
+    group_b.add_argument("--use-db",
                          type=str,
                          dest='use_db_name',
                          help='Name for a existing database that will be used.')
-    group_b.add_argument("--create_db",
+    group_b.add_argument("--create-db",
                          type=str,
                          dest='create_db_name',
                          help='Name for a new database that will be created.')
@@ -61,8 +61,8 @@ def parse_args():
                                                 "vir_genome-spacer blast query with given data and config.",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper-vh crispr [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use_db "
-                                          "USE_DB_NAME |  (--create_db CREATE_DB_NAME --virus VIRUS_DIR)")
+                                    usage="jasper-vh crispr [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use-db "
+                                          "USE_DB_NAME |  (--create-db CREATE_DB_NAME --virus VIRUS_DIR)")
     parser_c._optionals.title = "arguments"
     parser_c.add_argument("--host",
                           type=str,
@@ -74,7 +74,7 @@ def parse_args():
                           type=str,
                           dest='short_config',
                           help='File containing megablast config used in genome-genome query.')
-    parser_c.add_argument("--max_mismatches",
+    parser_c.add_argument("--max-mismatches",
                           required=False,
                           type=int,
                           default=1,
@@ -92,11 +92,11 @@ def parse_args():
                           help="Output file with final results.")
 
     group_c = parser_c.add_argument_group()
-    group_c.add_argument("--use_db",
+    group_c.add_argument("--use-db",
                          type=str,
                          dest='use_db_name',
                          help='Name for a existing database that will be used.')
-    group_c.add_argument("--create_db",
+    group_c.add_argument("--create-db",
                          type=str,
                          dest='create_db_name',
                          help='Name for a new database that will be created.')
@@ -139,22 +139,23 @@ def parse_args():
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker")
     parser_a._optionals.title = "arguments"
-    parser_a.add_argument("--host-dir",
+    parser_a.add_argument("--host",
                           type=str,
                           required=False,
                           dest='host_dir',
                           help='directory containing host seq files.')
-    parser_a.add_argument("--virus-dir",
+    parser_a.add_argument("--virus",
                           type=str,
                           required=True,
                           dest='virus_dir',
                           help='directory containing virus seq files.')
-    parser_a.add_argument("--results-file",
+    parser_a.add_argument("--output",
                           type=str,
-                          required=True,
+                          required=False,
+                          default="afree_results.csv",
                           dest='results_file',
                           help='directory for results files.')
-    parser_a.add_argument("--num_threads",
+    parser_a.add_argument("--num-threads",
                           type=int,
                           required=False,
                           default=os.cpu_count(),
