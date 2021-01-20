@@ -32,6 +32,8 @@ class Wish:
             FileNotFoundError: When given path does not exist.
             TypeError: When given object is not a Path object.
         """
+        if not isinstance(host_dir, Path) or not isinstance(phage_dir, Path):
+            raise TypeError("Given object is not a Path object.")
         if not host_dir.exists():
             raise FileNotFoundError("Host directory does not exist.")
         if not host_dir.is_dir():
@@ -40,8 +42,6 @@ class Wish:
             raise FileNotFoundError("Phage directory does not exist.")
         if not phage_dir.is_dir():
             raise ValueError("Phage directory is not a directory.")
-        if not isinstance(host_dir, Path) or not isinstance(phage_dir, Path):
-            raise TypeError("Given object is not a Path object.")
 
         self.host_dir = host_dir
         self.phage_dir = phage_dir

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import shutil
 import unittest
 from pathlib import Path
 
@@ -60,4 +60,24 @@ GACGGTACG"""
             wish._repair_fasta("wrong_type")
 
     def test_builds(self):
-        pass
+        wish = afree.Wish(self.test_dir / Path("data/fasta_test_data"), self.test_dir / Path("data/blast_query_data"))
+        wish.build(Path("utest_model_dir"))
+
+        self.assertTrue((Path("utest_model_dir").exists()))
+        self.assertTrue((Path("utest_model_dir/test_genome_spacers|1.mm")).exists())
+
+        shutil.rmtree(Path("utest_model_dir"))
+
+    def test_predicts(self):
+        wish = afree.Wish(self.test_dir / Path("data/fasta_test_data"), self.test_dir / Path("data/blast_query_data"))
+        wish.build(Path("utest_model_dir"))
+        wish.predict(Path("utest_model_dir"), Path("utest_output_dir"))
+        self.assertTrue((Path("utest_output_dir") / Path("prediction.list")).exists())
+        self.assertTrue((Path("utest_output_dir") / Path("llikelihood.matrix")).exists())
+
+        shutil.rmtree(Path("utest_output_dir"))
+        shutil.rmtree(Path("utest_model_dir"))
+
+
+if __name__ == '__main__':
+    unittest.main()
