@@ -24,13 +24,15 @@ LOGO = r"""
 TYPES = ('fasta', 'fa', 'fna')
 
 
-def chunks(lst: list, n: int):
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
-
 def parse_config(config_path: str, default_config: dict) -> dict:
+    """This function parses given config json file and returns default if any error
+
+    Args:
+        config_path (str): Path to json file with configuration.
+        default_config (dict): Default config to be returned if any error.
+    Returns:
+        (dict): Parsed config.
+    """
     try:
         with open(config_path, 'r') as fh:
             return json.load(fh)
@@ -38,14 +40,14 @@ def parse_config(config_path: str, default_config: dict) -> dict:
         return default_config
 
 
-def perform_tool_check(name: str):
+def perform_tool_check(names: list):
     """Check whether `name` is on PATH and marked as executable.
 
     `name` is a tool which JASPER will use, for instance `blastn`.
 
     Args:
-        name (str): Name of tool to perform check on.
+        names (list): Names of tools to perform check on.
     Returns:
-        (bool): Value indicating whether tool exists in PATH or not.
+        (bool): Value indicating whether all tools exists in PATH or not.
     """
-    return which(name) is not None
+    return all(which(x) is not None for x in names)
