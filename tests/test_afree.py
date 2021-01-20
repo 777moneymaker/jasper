@@ -3,6 +3,7 @@ import shutil
 import unittest
 from pathlib import Path
 
+import pandas as pd
 from jasper import afree
 
 
@@ -71,12 +72,20 @@ GACGGTACG"""
     def test_predicts(self):
         wish = afree.Wish(self.test_dir / Path("data/fasta_test_data"), self.test_dir / Path("data/blast_query_data"))
         wish.build(Path("utest_model_dir"))
-        wish.predict(Path("utest_model_dir"), Path("utest_output_dir"))
+        res = wish.predict(Path("utest_model_dir"), Path("utest_output_dir"))
         self.assertTrue((Path("utest_output_dir") / Path("prediction.list")).exists())
         self.assertTrue((Path("utest_output_dir") / Path("llikelihood.matrix")).exists())
 
         shutil.rmtree(Path("utest_output_dir"))
         shutil.rmtree(Path("utest_model_dir"))
+
+        expected = pd.DataFrame({
+            "seqs|1": [-1.55978],
+            "seqs|2": [-1.48808],
+        })
+        expected.index = pd.Index(["test_genome_spacers|1"])
+
+        self.assertTrue(res.equals(expected))
 
 
 if __name__ == '__main__':
