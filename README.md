@@ -35,6 +35,7 @@ So even if you have, for instance, one genome in your file, then **Jasper** will
 ```
 NCBI-Blast+
 PILER-CR
+WIsH
 tRNAscan-SE # not included in current release
 ```
 ## Installation
@@ -46,13 +47,15 @@ tRNAscan-SE # not included in current release
 
 On Ubuntu:
 * To install NCBI-Blast+ use `sudo apt install ncbi-blast+`
-* To install PILER-CR go [here](http://www.drive5.com/pilercr/), dowload compiled software, move somwhere and add to `$PATH` under name `pilercr`.
+* To install PILER-CR go [here](http://www.drive5.com/pilercr/), download compiled software, move somewhere and add to `$PATH` under name `pilercr`.
 * To install tRNAscan-SE use `sudo apt install trnascan-se`
+* To install WIsH go [here](https://github.com/soedinglab/WIsH), download, compile, move somewhere and add to `$PATH` under name `WIsH`.
 
 Source code for additional software:
 * NCBI-Blast+: [here](https://www.ncbi.nlm.nih.gov/books/NBK279671/)
 * PILER-CR [here](http://www.drive5.com/pilercr/)
 * tRNAscan-SE [here](http://lowelab.ucsc.edu/tRNAscan-SE/)
+* WIsH [here](https://github.com/soedinglab/WIsH)
 
 **Remember to install everything and add it to path**
 
@@ -78,6 +81,7 @@ JASPER uses bunch of arguments. A lot of parameters are BLAST parameters and can
 jasper-vh blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir
 jasper-vh crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir
 jasper-vh trna --args # soon
+jasper-vh afree --args # soon
 jasper-vh merge results1.csv results2.csv results3.csv [-w --weigths] 0.6 0.2 0.2 --output final_results.csv 
 ```
 
@@ -86,11 +90,12 @@ For more check `--help` on jasper individual modules: `jasper-vh  {blast,crispr,
 ##### Blast config
 You can provide blast config as as a `*.json` file.
 Every module uses different task so there are few arguments that are forbidden:
-`[query', 'db', 'outfmt', 'max_target_seqs', 'num_alignments']`
+`['query', 'db', 'outfmt', 'max_target_seqs', 'num_alignments']`
 
 ## References
-* Edgar, R.C. (2007) [PILER-CR: fast and accurate identification of CRISPR repeats](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18
-* Fichant and Burks, J. Mol. Biol. (1991) Identification of tRNA genes in genomic DNA, 220:659-671.
+* Edgar, R.C. (2007) [*PILER-CR: fast and accurate identification of CRISPR repeats*](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18
+* Fichant and Burks, J. Mol. Biol. (1991) *Identification of tRNA genes in genomic DNA*, 220:659-671.
+* Clovis Galiez, Matthias Siebert et al. *"WIsH: who is the host? Predicting prokaryotichosts from metagenomic phage contigs*
 * [NCBI-BLAST+](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
 
 ## License

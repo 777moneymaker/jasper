@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import unittest
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 from jasper import merge
 
 
@@ -15,7 +17,8 @@ class MergeTests(unittest.TestCase):
         self.test_dir = Path(__file__).parent.absolute()
 
     def test_multiply_frames_ok(self):
-        frames = [pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}), pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]})]
+        frames = [pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}),
+                  pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]})]
         res = merge.multiply_frames_by(frames, [2, 2])
         self.assertTrue(res[0].equals(pd.DataFrame({"T": [1, 2, 3], "Score": [2, 4, 6]})))
         self.assertTrue(res[1].equals(pd.DataFrame({"T": [1, 2, 3], "Score": [2, 4, 6]})))
@@ -26,7 +29,8 @@ class MergeTests(unittest.TestCase):
             merge.multiply_frames_by(pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}), 2)
             merge.multiply_frames_by(4, pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}))
             merge.multiply_frames_by(
-                [pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}), pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]})],
+                [pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]}),
+                 pd.DataFrame({"T": [1, 2, 3], "Score": [1, 2, 3]})],
                 ['nan', 'nan']
             )
 

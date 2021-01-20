@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+"""This module manages the alignment-free operations and analysis.
+
+This module uses Biopython and WIsH software for virus's host prediction by using alignment-free methods.
+
+More about it:
+    1. https://biopython.org/
+
+    2. https://github.com/soedinglab/WIsH
+"""
+
 import io
 import os
 import shutil
@@ -6,7 +16,6 @@ import subprocess
 from pathlib import Path
 
 import pandas as pd
-import numpy as np
 from Bio import SeqIO
 
 from . import utils
@@ -14,23 +23,45 @@ from . import utils
 
 class Wish:
     def __init__(self, host_dir: Path, phage_dir: Path):
+        """Inits Wish object with 2 directories. One phage directory and one host directory.
+        Args:
+            host_dir (Path): Path to directory containing host files.
+            phage_dir (str): Path to directory containing phage files.
+        Raises:
+            ValueError: When given path is not a directory.
+            FileNotFoundError: When given path does not exist.
+            TypeError: When given object is not a Path object.
+        """
         if not host_dir.exists():
-            raise TypeError("Host directory does not exist.")
+            raise FileNotFoundError("Host directory does not exist.")
         if not host_dir.is_dir():
-            raise TypeError("Host directory is not a directory.")
+            raise ValueError("Host directory is not a directory.")
         if not phage_dir.exists():
-            raise TypeError("Phage directory does not exist.")
+            raise FileNotFoundError("Phage directory does not exist.")
         if not phage_dir.is_dir():
-            raise TypeError("Phage directory is not a directory.")
+            raise ValueError("Phage directory is not a directory.")
+        if not isinstance(host_dir, Path) or not isinstance(phage_dir, Path):
+            raise TypeError("Given object is not a Path object.")
 
         self.host_dir = host_dir
         self.phage_dir = phage_dir
 
     def _repair_fasta(self, file: Path):
+        """This function reads single fasta file and returns its content.
+
+        Raises:
+            TypeError: When given file is of wrong type.
+            FileNotFoundError: When given path does not exist.
+            ValueError: When given path is not a file.
+        Returns:
+            (str): Repaired content of the file.
+        """
         if not isinstance(file, Path):
             raise TypeError("File is not a Path object.")
+        if not file.exists():
+            raise FileNotFoundError("Given file does not exist.")
         if not file.is_file():
-            raise FileNotFoundError("Given path is not a file.")
+            raise ValueError("Given path is not a file.")
 
         repaired_content: list = []
         contig: int = 1
@@ -44,9 +75,17 @@ class Wish:
                     repaired_content.append(line)
         return "".join(repaired_content)
 
-    def build(self, model_dir: Path = Path("temp_model_dir"), threads: int = os.cpu_count()):
-        # WIsH -c build -g ~/Desktop/JASPER/example_data/host/ -m modelDir -t 3
+    def build(self, model_dir: Path = Path("afree_model_dir"), threads: int = os.cpu_count()):
+        """This function uses WIsH software to build a model for source files.
+        For more information, check WIsH documentation.
 
+        Args:
+            model_dir (Path): Path to directory in which model will be created.
+            threads (int): Number of threads to pass to WIsH.
+        Raises:
+            SubprocessError: When WIsH returned error.
+        """
+        # WIsH -c build -g ~/Desktop/JASPER/example_data/host/ -m modelDir -t 3
         if not model_dir.exists():
             model_dir.mkdir()
 
@@ -55,7 +94,6 @@ class Wish:
             temp_input_dir.mkdir()
 
         for i, host_file in enumerate(self.host_dir.iterdir(), 1):
-            print(f"host concat {i}", end='\r')
             repaired = self._repair_fasta(host_file)
             for record in SeqIO.parse(io.StringIO(repaired), 'fasta'):
                 with open(temp_input_dir / Path(f"{record.id}.fasta"), 'w+') as fh:
@@ -71,10 +109,25 @@ class Wish:
         if output.stderr.decode():
             raise subprocess.SubprocessError(output.stderr.decode())
 
-    def predict(self, model_dir: Path = Path("temp_model_dir"), output_dir: Path = Path("temp_output_dir"), threads: int = os.cpu_count()):
+    def predict(self, model_dir: Path = Path("afree_model_dir"), output_dir: Path = Path("afree_output_dir"),
+                threads: int = os.cpu_count()):
+        """This function uses WIsH software to predict host for a phage by using a-free methods and precomputed model.
+        For more information, check WIsH documentation.
+
+        Args:
+            model_dir (Path): Path to directory containing model.
+            output_dir (Path): Path to directory in which output from WIsH will be placed. Note: it's temporary dir.
+            threads (int): Number of threads to pass to WIsH.
+        Raises:
+            SubprocessError: When WIsH returned error.
+            FileNotFoundError: When directory containing model does not exist.
+        Returns:
+            (pd.DataFrame): Dataframe (in form of matrix) containing log-likelihood results from WIsH.
+        """
         # WIsH -c predict -g ~/Desktop/JASPER/example_data/virus/ -m modelDir -r outputResultDir -b
         if not model_dir.exists():
             raise FileNotFoundError("Model directory does not exist.")
+
         if not output_dir.exists():
             output_dir.mkdir()
 
@@ -83,7 +136,6 @@ class Wish:
             temp_input_dir.mkdir()
 
         for i, phage_file in enumerate(self.phage_dir.iterdir(), 1):
-            print(f"phage concat {i}", end='\r')
             repaired = self._repair_fasta(phage_file)
             for record in SeqIO.parse(io.StringIO(repaired), 'fasta'):
                 with open(temp_input_dir / Path(f"{record.id}.fasta"), 'w+') as fh:
@@ -104,6 +156,10 @@ class Wish:
 
 
 def main(args):
+    """Main function for running module.
+    Args:
+        args (argparse obj): Arguments from right subparser.
+    """
     print(utils.LOGO)
     if args.host_dir is None:
         args.host_dir = "."
@@ -120,7 +176,7 @@ def main(args):
         df = w.predict(model_dir=Path(args.model_dir), threads=args.threads)
     else:
         df = w.predict(threads=args.threads)
-    shutil.rmtree(Path("temp_output_dir"))
+    shutil.rmtree(Path("afree_output_dir"))
 
     tuplz = df.stack().reset_index().agg(tuple, 1).to_list()
     final_df = pd.DataFrame(tuplz, columns=['Host', 'Virus', 'Score'])
@@ -130,6 +186,6 @@ def main(args):
     print(final_df)
 
     if args.clear_after:
-        shutil.rmtree(Path("temp_model_dir"))
+        shutil.rmtree(Path("afree_model_dir"))
 
     print("Saved results to", args.results_file)

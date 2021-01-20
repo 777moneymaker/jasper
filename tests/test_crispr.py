@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import shutil
-import subprocess
 import unittest
-from unittest.mock import patch
+from pathlib import Path
+
 from jasper import crispr
 from tests import utils
-from pathlib import Path
 
 
 class BlastTests(unittest.TestCase):
@@ -50,7 +49,8 @@ class BlastTests(unittest.TestCase):
 
     def test_find_crispr_spacers_ok(self):
         finder = crispr.CrisprFinder(source_dir=self.test_dir / Path("data/fasta_test_data"), name="test_db")
-        finder.find_crispr_spacers(self.test_dir / Path("data/fasta_test_data/test_genome_spacers.fasta"), Path("piler_output"))
+        finder.find_crispr_spacers(self.test_dir / Path("data/fasta_test_data/test_genome_spacers.fasta"),
+                                   Path("piler_output"))
         self.assertTrue(Path("piler_output").exists())
 
         with open(Path("piler_output"), 'r') as fh:
@@ -61,7 +61,8 @@ class BlastTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             finder = crispr.CrisprFinder(source_dir=self.test_dir / Path("data/fasta_test_data"), name="test_db")
             finder.find_crispr_spacers("not a path obj", self.test_dir / Path("piler_output"))
-            finder.find_crispr_spacers(self.test_dir / Path("data/fasta_test_data/test_genome_spacers.fasta"), "not a path obj")
+            finder.find_crispr_spacers(self.test_dir / Path("data/fasta_test_data/test_genome_spacers.fasta"),
+                                       "not a path obj")
 
     def test_find_crispr_spacers_wrong_file(self):
         with self.assertRaises(FileNotFoundError):

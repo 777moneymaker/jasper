@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import os
 import subprocess
 import unittest
-from unittest.mock import Mock, patch
-import os
-import pandas as pd
 from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pandas as pd
 
 from jasper import blast
 
@@ -50,17 +51,20 @@ GACGGTACG"""
             db._repair_fasta("not a path object")
 
     def test_aggregate_ok(self):
-        blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path("data/fasta_test_data"), Path("blast_input.fasta"))
+        blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path("data/fasta_test_data"),
+                                                                       Path("blast_input.fasta"))
         self.assertTrue(Path("blast_input.fasta").exists())
         self.assertTrue(os.path.getsize(Path("blast_input.fasta")) > 0)
 
     def test_aggregate_empty(self):
         with self.assertRaises(ValueError):
-            blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path("data/fasta_test_empty_data"), Path("blast_input.fasta"))
+            blast.Database(source_dir=Path(""), name="test_db")._aggregate(
+                self.test_dir / Path("data/fasta_test_empty_data"), Path("blast_input.fasta"))
 
     def test_aggregate_wrong_dir(self):
         with self.assertRaises(FileNotFoundError):
-            blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path("not existing"), Path("blast_input.fasta"))
+            blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path("not existing"),
+                                                                           Path("blast_input.fasta"))
             blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path(
                 "data/blast_query_data/seqs.fasta"), Path("blast_input.fasta"))
 
@@ -70,7 +74,7 @@ GACGGTACG"""
             db._aggregate("not a path obj", Path("blast_input.fasta"))
             db._aggregate(Path(""), "not a path obj")
 
-    def test_create(self,):
+    def test_create(self, ):
         db, output = blast.Database(source_dir=self.test_dir / Path("data/fasta_test_data"), name="test_db").create()
         self.assertTrue(Path("test_db.nhr").exists())
         self.assertTrue(Path("test_db.nhr").exists())
@@ -85,7 +89,8 @@ GACGGTACG"""
     def test_query_ok(self):
         db = blast.Database(source_dir=self.test_dir / Path("data/blast_query_data"), name="test_db")
         db.create()
-        expected = pd.DataFrame(columns=['Virus', 'Host', 'Score'], data=[['seqs|1', 'seqs|1', 10], ['seqs|2', 'seqs|2', 9]])
+        expected = pd.DataFrame(columns=['Virus', 'Host', 'Score'],
+                                data=[['seqs|1', 'seqs|1', 10], ['seqs|2', 'seqs|2', 9]])
         res = db.query(self.test_dir / Path("data/blast_query_data"),
                        config={"task": "blastn-short"},
                        blast_format="10 qseqid sseqid score",
