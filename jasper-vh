@@ -6,7 +6,9 @@ import os
 def parse_args():
     parser = argparse.ArgumentParser(prog='jasper',
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description="")
+                                     description="JASPER is a program for prediction of virus's host",
+                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
+                                           "Check my github: github.com/777moneymaker",)
 
     subparser = parser.add_subparsers(dest="subparser_name", required=True)
 

@@ -93,3 +93,7 @@ jasper/__pycache__/
 # dist sh*T
 dist/
 jasper_vh.egg-info/
+
+afree_model_dir/
+*.csv
+*.sh

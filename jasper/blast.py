@@ -45,7 +45,8 @@ class Database:
         self.source_dir = Path(source_dir)
         self.name = name
 
-    def _repair_fasta(self, file: Path):
+    @staticmethod
+    def repair_fasta(file: Path):
         """This function reads single fasta file and returns its content.
 
         Raises:
@@ -100,7 +101,7 @@ class Database:
             if not source_file.name.endswith(utils.TYPES):
                 continue
             with open(outfile, 'a+') as fh:
-                fh.write(self._repair_fasta(source_file))
+                fh.write(Database.repair_fasta(source_file))
 
         if os.path.getsize(outfile) == 0:  # size == 0
             raise ValueError("Blast input file is empty. Check your input.")

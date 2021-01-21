@@ -18,6 +18,7 @@ from pathlib import Path
 import pandas as pd
 from Bio import SeqIO
 
+from . import blast
 from . import utils
 
 
@@ -46,35 +47,6 @@ class Wish:
         self.host_dir = host_dir
         self.phage_dir = phage_dir
 
-    def _repair_fasta(self, file: Path):
-        """This function reads single fasta file and returns its content.
-
-        Raises:
-            TypeError: When given file is of wrong type.
-            FileNotFoundError: When given path does not exist.
-            ValueError: When given path is not a file.
-        Returns:
-            (str): Repaired content of the file.
-        """
-        if not isinstance(file, Path):
-            raise TypeError("File is not a Path object.")
-        if not file.exists():
-            raise FileNotFoundError("Given file does not exist.")
-        if not file.is_file():
-            raise ValueError("Given path is not a file.")
-
-        repaired_content: list = []
-        contig: int = 1
-        with open(file, 'r') as fh:
-            for line in fh:
-                if line.startswith(">"):
-                    seq_id = f">{file.stem}|{contig}\n"  # Read header
-                    repaired_content.append(seq_id)
-                    contig += 1
-                else:
-                    repaired_content.append(line)
-        return "".join(repaired_content)
-
     def build(self, model_dir: Path = Path("afree_model_dir"), threads: int = os.cpu_count()):
         """This function uses WIsH software to build a model for source files.
         For more information, check WIsH documentation.
@@ -94,7 +66,7 @@ class Wish:
             temp_input_dir.mkdir()
 
         for i, host_file in enumerate(self.host_dir.iterdir(), 1):
-            repaired = self._repair_fasta(host_file)
+            repaired = blast.Database.repair_fasta(host_file)
             for record in SeqIO.parse(io.StringIO(repaired), 'fasta'):
                 with open(temp_input_dir / Path(f"{record.id}.fasta"), 'w+') as fh:
                     SeqIO.write(record, fh, 'fasta')
@@ -136,7 +108,7 @@ class Wish:
             temp_input_dir.mkdir()
 
         for i, phage_file in enumerate(self.phage_dir.iterdir(), 1):
-            repaired = self._repair_fasta(phage_file)
+            repaired = blast.Database.repair_fasta(phage_file)
             for record in SeqIO.parse(io.StringIO(repaired), 'fasta'):
                 with open(temp_input_dir / Path(f"{record.id}.fasta"), 'w+') as fh:
                     SeqIO.write(record, fh, 'fasta')

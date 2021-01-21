@@ -33,7 +33,7 @@ class BlastTests(unittest.TestCase):
 
     def test_repair_ok(self):
         db = blast.Database(source_dir=Path(""), name="test_db")
-        result = db._repair_fasta(self.test_dir / Path("data/blast_query_data/seqs.fasta"))
+        result = db.repair_fasta(self.test_dir / Path("data/blast_query_data/seqs.fasta"))
         expected = """>seqs|1
 ATGCTGATCG
 >seqs|2
@@ -43,12 +43,12 @@ GACGGTACG"""
     def test_repair_wrong_file(self):
         db = blast.Database(source_dir=Path(""), name="test_db")
         with self.assertRaises(FileNotFoundError):
-            db._repair_fasta(self.test_dir / Path("data/fasta_test_data"))
+            db.repair_fasta(self.test_dir / Path("data/fasta_test_data"))
 
     def test_repair_wrong_type(self):
         db = blast.Database(source_dir=self.test_dir / Path("data/fasta_test_data"), name="test_db")
         with self.assertRaises(TypeError):
-            db._repair_fasta("not a path object")
+            db.repair_fasta("not a path object")
 
     def test_aggregate_ok(self):
         blast.Database(source_dir=Path(""), name="test_db")._aggregate(self.test_dir / Path("data/fasta_test_data"),

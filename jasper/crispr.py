@@ -63,7 +63,7 @@ class CrisprFinder(blast.Database):
 
             repaired_file = Path(f"{host.stem}.repaired")
             with open(repaired_file, "w+") as repaired_fh:
-                repaired_fh.write(self._repair_fasta(host))
+                repaired_fh.write(blast.Database.repair_fasta(host))
 
             piler_file = res_dir / Path(f"{host.stem}.piler")  # Output file for PILERCR.
             self.find_crispr_spacers(repaired_file, piler_file)  # Find crispr spacers for given file.
