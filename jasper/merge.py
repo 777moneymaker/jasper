@@ -60,3 +60,4 @@ def main(args):
 
     final['Score'] = final['Score'].round(decimals=2)
     final.to_csv(args.output, index=False)
+    print('Saved final results to', args.output)

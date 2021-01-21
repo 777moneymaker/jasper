@@ -208,7 +208,6 @@ if __name__ == '__main__':
     elif subparser_name == 'merge':
         from jasper import merge
         merge.main(args)
-        print("Saved final results to", args.output)
     elif subparser_name == 'afree':
         from jasper import afree
         afree.main(args)

@@ -222,13 +222,21 @@ def main(args):
         db = Database(Path('.'), args.use_db_name)
     print("Quering...")
     query_df = db.query(Path(args.virus_dir),
-                        blast_format="10 qseqid sseqid score",
-                        headers=("Virus", "Host", "Score"),
+                        blast_format="10 qseqid sseqid score length",
+                        headers=("Virus", "Host", "Score", "Alen"),
                         config=args.blastn_config)
     if args.clear_after:
         db.clear_files()
 
     query_df['Score'] = query_df['Score'].apply(pd.to_numeric)
+    query_df['Alen'] = query_df['Alen'].apply(pd.to_numeric)
+
+    # Normalization
+    match_reward = 2 if not args.blastn_config.get('reward') else args.blastn_config.get('reward')
+    query_df['Score'] = query_df['Score'] / (query_df['Alen'] * match_reward)
+
+    query_df = query_df.drop(columns=['Alen'])
+
     print("Blastn results (genome-genome query): ", query_df, sep='\n')
 
     query_df.to_csv(args.output_file, index=False)
