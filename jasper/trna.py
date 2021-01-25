@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+import io
 import os
 import subprocess
 from pathlib import Path
 
+import pandas as pd
 from Bio import SeqIO
-from Bio.Blast.Applications import NcbimakeblastdbCommandline
+from Bio.Blast.Applications import NcbimakeblastdbCommandline, NcbiblastnCommandline
 
 from . import blast
 from . import utils
@@ -16,9 +18,17 @@ class tRNAScanner:
         self.target_dir = target_dir
         self.name = name
 
-    def scan(self, source_dir: Path, mode: str = 'general', threads: int = os.cpu_count()):
+    def clear_files(self):
+        """Function clears database files if any present."""
+        for file in Path(".").iterdir():
+            if file.stem == self.name and file.suffix in (".nhr", ".nin", ".nsq"):
+                file.unlink()
+
+    # max_iter for tests
+    def scan(self, source_dir: Path, output_filename: str, mode: str = 'general', threads: int = os.cpu_count(), max_iter: int = 10):
         aggregate = Path("trna_aggregate.fasta")
         for i, source_file in enumerate(source_dir.iterdir(), 1):
+            if i == max_iter: break
             if not source_file.name.endswith(utils.TYPES):
                 continue
 
@@ -26,18 +36,17 @@ class tRNAScanner:
                 aggregate_fh.write(blast.Database.repair_fasta(source_file))
             print(f"Performed {i} files aggregation for tRNA-scan", end='\r')
 
-        print()
         print("\nRunning tRNAscan-SE")
-        out_file = Path("trnascan_out.fasta")
+        out_file = Path(output_filename)
         trna_output = self.run_trnascan(aggregate, out_file, threads, mode)
-        print(trna_output.stdout.decode())
         aggregate.unlink()
 
-        with open(out_file, 'r') as trna_fh:
-            trnas = [(str(record.seq), record.name) for record in SeqIO.parse(trna_fh, 'fasta')]
-
-        out_file.unlink()
-        return trnas
+        # with open(out_file, 'r') as trna_fh:
+        #     trnas = [(str(record.seq), record.name) for record in SeqIO.parse(trna_fh, 'fasta')]
+        #
+        # out_file.unlink()
+        # return trnas
+        return out_file
 
     def run_trnascan(self, file: Path, out_file: Path, num_threads: int, mode: str):
         scan_mode = {'bacterial': "-B", "phage": "-P", "general": "-G"}[mode]
@@ -46,19 +55,21 @@ class tRNAScanner:
                              capture_output=True)
         return res
 
-    def create(self):
+
+    def create(self, input_file: Path):
         '''
-        TODO: FIX THAT
+        TODO: TEST THIS
         '''
 
         try:
-            cmd = NcbimakeblastdbCommandline(input_file="trna_blast_input.fasta",
+            cmd = NcbimakeblastdbCommandline(input_file=str(input_file),
                                              dbtype="nucl",
                                              title=self.name,
                                              out=self.name)
-            makeblastdb_output = subprocess.run(str(cmd), capture_output=True)  # shell=True
+            cmd()
+            makeblastdb_output = subprocess.run(str(cmd), capture_output=True, shell=True)
             if makeblastdb_output.stderr:
-                if not Path("blast_input.fasta").exists():
+                if not input_file.exists():
                     raise subprocess.SubprocessError(
                         "Makeblastdb returned error. Input file for Makeblastdb does not exist. Check your input.",
                         str(cmd))
@@ -68,22 +79,61 @@ class tRNAScanner:
         except Exception:
             raise
         finally:
-            if Path("blast_input.fasta").exists():
-                Path("blast_input.fasta").unlink()
-            return self, makeblastdb_output.stdout.decode()
+            if input_file.exists():
+                input_file.unlink()
+        return makeblastdb_output.stdout.decode()
+
+    def query(self, query_file: Path, config: dict, blast_format: str, headers: tuple):
+        try:
+            cmd = NcbiblastnCommandline(query=str(query_file),
+                                        db=self.name,
+                                        outfmt=blast_format,
+                                        **config)
+            blast_output = subprocess.run(str(cmd), capture_output=True, shell=True)
+
+            # Error only occurs if it's not this stupid warning.
+            if blast_output.stderr and "Examining 5 or more matches" not in blast_output.stderr.decode():
+                if not Path("blast_query.fasta").exists():
+                    raise subprocess.SubprocessError(
+                        "Blastn returned error. Input file for Blastn does not exist. Check your input.", str(cmd))
+                else:
+                    raise subprocess.SubprocessError("Blastn returned error. Check your input.",
+                                                     blast_output.stderr.decode())
+            print(blast_output.stdout)
+        except Exception:
+            raise
+        finally:
+            if query_file.exists():
+                query_file.unlink()
+        results_df: pd.DataFrame = pd.read_csv(io.StringIO(blast_output.stdout.decode()), header=None, names=headers)
+        return results_df
 
 
-if __name__ == '__main__':
+def main():
     print(utils.LOGO)
 
     t = tRNAScanner(source_dir=Path("example_data/host"), target_dir=Path("example_data/virus"), name="trna_db")
     print("Aggregation and scanning host files...")
-    host_trnas = t.scan(t.source_dir, mode="bacterial")
+    host = t.scan(t.source_dir, output_filename="host_trnas.fasta", mode="general", threads=6, max_iter=10)
     print("Done\n")
 
     print("Aggregation and scanning phage files...")
-    vir_trnas = t.scan(t.target_dir, mode="phage")
+    vir = t.scan(t.target_dir, output_filename="phage_trnas.fasta", mode="general", threads=6, max_iter=60)
     print("Done\n")
 
-    print(*vir_trnas, sep="\n")
-    print(*host_trnas, sep="\n")
+    print("Making a trna host database...")
+    db_output = t.create(host)
+    print(db_output)
+
+    print("Quering a phage trnas")
+    results_df = t.query(vir, {"task": "blastn-short"}, blast_format="10 qseqid sseqid score", headers=("Virus", "Host", "Score"))
+    print("Done")
+    print(results_df)
+
+    results_df.to_csv("trna_results.csv", index=False)
+    print("Saved trnas results")
+    t.clear_files()
+
+
+if __name__ == '__main__':
+    main()
