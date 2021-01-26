@@ -109,10 +109,15 @@ class tRNAScanner:
         return results_df
 
 
-def main():
+def main(args):
     print(utils.LOGO)
 
-    t = tRNAScanner(source_dir=Path("example_data/host"), target_dir=Path("example_data/virus"), name="trna_db")
+    args.blastn_config = utils.parse_config(args.blastn_config, {
+        "task": "blastn",
+        "num_threads": os.cpu_count(),
+    })
+
+    t = tRNAScanner(source_dir=Path(args.host_dir), target_dir=Path(args.virus_dir), name="trna_db")
     print("Aggregation and scanning host files...")
     host = t.scan(t.source_dir, output_filename="host_trnas.fasta", mode="general", threads=6, max_iter=10)
     print("Done\n")
@@ -130,7 +135,7 @@ def main():
     print("Done")
     print(results_df)
 
-    results_df.to_csv("trna_results.csv", index=False)
+    results_df.to_csv(args.output_file, index=False)
     print("Saved trnas results")
     t.clear_files()
 

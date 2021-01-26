@@ -8,7 +8,7 @@ def parse_args():
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description="JASPER is a program for prediction of virus's host",
                                      epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
-                                           "Check my github: github.com/777moneymaker",)
+                                            "Check my github: github.com/777moneymaker", )
 
     subparser = parser.add_subparsers(dest="subparser_name", required=True)
 
@@ -174,6 +174,35 @@ def parse_args():
                           dest='clear_after',
                           help='if model directory should be deleted. Can be re-used')
 
+    # Trna parser
+    parser_t = subparser.add_parser(name='trna',
+                                    description="JASPER is a program for prediction of virus's host. This module is "
+                                                "performing tRNA scan and blast query with retrieved tRNAs",
+                                    epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
+                                           "Check my github: github.com/777moneymaker",
+                                    usage="jasper-vh trna [-h] --virus VIRUS_DIR --host HOST_DIR [--config BLASTN_CONFIG]")
+    parser_t._optionals.title = "arguments"
+    parser_t.add_argument("--virus",
+                          required=True,
+                          type=str,
+                          dest='virus_dir',
+                          help='directory containing virus seq files.')
+    parser_t.add_argument("--host",
+                          type=str,
+                          dest='host_dir',
+                          help='directory containing host seq files.')
+    parser_t.add_argument("--config",
+                          required=False,
+                          type=str,
+                          dest='blastn_config',
+                          help='File containing megablast config used in genome-genome query.')
+    parser_t.add_argument('--output',
+                          required=False,
+                          type=str,
+                          dest="output_file",
+                          default="trna_results.csv",
+                          help="Output file with final results.")
+
     args = parser.parse_args()
     if args.subparser_name == 'blast':
         if args.use_db_name and any([args.create_db_name, args.host_dir]):
@@ -201,13 +230,21 @@ if __name__ == '__main__':
     subparser_name = args.subparser_name
     if subparser_name == 'blast':
         from jasper import blast
+
         blast.main(args)
     elif subparser_name == 'crispr':
         from jasper import crispr
+
         crispr.main(args)
     elif subparser_name == 'merge':
         from jasper import merge
+
         merge.main(args)
     elif subparser_name == 'afree':
         from jasper import afree
+
         afree.main(args)
+    elif subparser_name == 'trna':
+        from jasper import trna
+
+        trna.main(args)
