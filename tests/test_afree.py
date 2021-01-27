@@ -55,13 +55,28 @@ class AfreeTests(unittest.TestCase):
         shutil.rmtree(Path("utest_output_dir"))
         shutil.rmtree(Path("utest_model_dir"))
 
-        expected = pd.DataFrame({
+        expected1 = pd.DataFrame({
             "seqs|1": [-1.55978],
             "seqs|2": [-1.48808],
         })
-        expected.index = pd.Index(["test_genome_spacers|1"])
+        expected2 = pd.DataFrame({
+            "seqs|1": [-1.48808],
+            "seqs|2": [-1.55978],
+        })
+        expected3 = pd.DataFrame({
+            "seqs|2": [-1.55978],
+            "seqs|1": [-1.48808],
+        })
+        expected4 = pd.DataFrame({
+            "seqs|2": [-1.48808],
+            "seqs|1": [-1.55978],
+        })
+        expected1.index = pd.Index(["test_genome_spacers|1"])
+        expected2.index = pd.Index(["test_genome_spacers|1"])
+        expected3.index = pd.Index(["test_genome_spacers|1"])
+        expected4.index = pd.Index(["test_genome_spacers|1"])
 
-        self.assertTrue(res.equals(expected))
+        self.assertTrue(any(res.equals(x) for x in [expected1, expected2, expected3, expected4]))
 
 
 if __name__ == '__main__':

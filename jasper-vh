@@ -1,6 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 import argparse
 import os
+import sys
 
 
 def parse_args():
@@ -10,7 +11,8 @@ def parse_args():
                                      epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                             "Check my github: github.com/777moneymaker", )
 
-    subparser = parser.add_subparsers(dest="subparser_name", required=True)
+    subparser = parser.add_subparsers(dest="subparser_name")
+    subparser.required = True
 
     # Blast parser
     parser_b = subparser.add_parser(name='blast',
@@ -202,6 +204,12 @@ def parse_args():
                           dest="output_file",
                           default="trna_results.csv",
                           help="Output file with final results.")
+    parser_t.add_argument('--num-threads',
+                          required=False,
+                          type=int,
+                          default=1,
+                          dest="num_threads",
+                          help="Num of threads to use")
 
     args = parser.parse_args()
     if args.subparser_name == 'blast':
@@ -226,25 +234,23 @@ def parse_args():
 
 
 if __name__ == '__main__':
+    if not sys.version_info >= (3, 7):
+        raise EnvironmentError("Python version is not >= 3.7")
+
     args = parse_args()
     subparser_name = args.subparser_name
     if subparser_name == 'blast':
         from jasper import blast
-
         blast.main(args)
     elif subparser_name == 'crispr':
         from jasper import crispr
-
         crispr.main(args)
     elif subparser_name == 'merge':
         from jasper import merge
-
         merge.main(args)
     elif subparser_name == 'afree':
         from jasper import afree
-
         afree.main(args)
     elif subparser_name == 'trna':
         from jasper import trna
-
         trna.main(args)

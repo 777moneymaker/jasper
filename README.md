@@ -12,6 +12,10 @@ JASPER uses a bunch of bioinformatics tools to prediction virus hosts. It includ
 JASPER contains few, independent modules `blast`, `crispr`, `trna - not included now`, `merge`.
 
 ## Requirements
+### PYTHON3.7
+
+You need `Python >= 3.7` to use JASPER.
+
 ### Naming convention
 **Jasper** depends on good file naming convention. The best is to use sequence ID as file name, e.x. `NC_008876.fna`. Software will use this id to name every temp file that needs to be created and also it will use this ID in results file.
 
@@ -48,7 +52,7 @@ tRNAscan-SE # not included in current release
 On Ubuntu:
 * To install NCBI-Blast+ use `sudo apt install ncbi-blast+`
 * To install PILER-CR go [here](http://www.drive5.com/pilercr/), download compiled software, move somewhere and add to `$PATH` under name `pilercr`.
-* To install tRNAscan-SE use `sudo apt install trnascan-se`
+* To install tRNAscan-SE go [here], download, compile, move somewhere and add to `$PATH` under name `tRNAscan-SE`.
 * To install WIsH go [here](https://github.com/soedinglab/WIsH), download, compile, move somewhere and add to `$PATH` under name `WIsH`.
 
 Source code for additional software:

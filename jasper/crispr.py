@@ -9,9 +9,9 @@ More about it:
     2. https://biopython.org/docs/dev/api/Bio.Blast.Applications.html
 
     3. http://www.ncbi.nlm.nih.gov/pubmed/17239253
-"""
 
-from __future__ import annotations
+    4. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2447716/
+"""
 
 import os
 import shutil
@@ -46,7 +46,7 @@ class CrisprFinder(blast.Database):
         if not directory.exists():
             directory.mkdir()
 
-    def retrieve_spacers(self) -> CrisprFinder:
+    def retrieve_spacers(self):
         """This function retrieves spacers from files in source directory
 
         This method uses blast module functionality.
@@ -142,7 +142,7 @@ def main(args):
     })
 
     print("Starting analysis...")
-    print("Aggregating files, retrieving crispr spacers...")
+    print("Repairing files, retrieving crispr spacers...")
     finder = CrisprFinder(Path(args.host_dir), "-")
     finder.retrieve_spacers()
 

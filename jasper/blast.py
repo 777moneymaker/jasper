@@ -10,8 +10,6 @@ More about it:
 
     3. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2447716/
 """
-from __future__ import annotations
-
 import io
 import os
 import subprocess

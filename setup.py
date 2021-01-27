@@ -21,6 +21,7 @@ setup(
         "biopython",
         "numpy",
         "pandas",
+        "argparse",
     ],
     scripts=['jasper-vh'],
     classifiers=[
