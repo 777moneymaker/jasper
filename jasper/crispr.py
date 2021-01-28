@@ -121,7 +121,7 @@ class CrisprFinder(blast.Database):
             subprocess.run(['pilercr', '-in', str(host_file), '-out', str(out_file)], stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
-            raise subprocess.SubprocessError("PilerCR returned error. Check your input", e.output)
+            raise subprocess.SubprocessError(f"Piler-CR returned error: {e.output}")
 
 
 def main(args):

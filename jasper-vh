@@ -241,16 +241,21 @@ if __name__ == '__main__':
     subparser_name = args.subparser_name
     if subparser_name == 'blast':
         from jasper import blast
+
         blast.main(args)
     elif subparser_name == 'crispr':
         from jasper import crispr
+
         crispr.main(args)
     elif subparser_name == 'merge':
         from jasper import merge
+
         merge.main(args)
     elif subparser_name == 'afree':
         from jasper import afree
+
         afree.main(args)
     elif subparser_name == 'trna':
         from jasper import trna
+
         trna.main(args)

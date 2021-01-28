@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import sys
 import unittest
 from pathlib import Path
 
@@ -9,6 +11,16 @@ from jasper import merge
 
 class Expando(object):
     pass
+
+
+class HiddenPrints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 
 
 class MergeTests(unittest.TestCase):
@@ -53,7 +65,9 @@ class MergeTests(unittest.TestCase):
         args.files = [self.test_dir / Path('data/test_df_merge1.csv'), self.test_dir / Path('data/test_df_merge2.csv')]
         args.weights = [.4, .6]
         args.output = "merged_jasper_results.csv"
-        merge.main(args)
+
+        with HiddenPrints():
+            merge.main(args)
 
         self.assertTrue(Path("merged_jasper_results.csv").exists())
         res = pd.read_csv(args.output)
@@ -62,6 +76,9 @@ class MergeTests(unittest.TestCase):
             "Host": ["h3", "h2", "h1"],
             "Score": [7.0, 6.4, 3.4]
         })))
+
+        if Path("merged_jasper_results.csv").exists():
+            Path("merged_jasper_results.csv").unlink()
 
 
 if __name__ == "__main__":

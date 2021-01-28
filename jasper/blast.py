@@ -125,13 +125,7 @@ class Database:
                                              out=self.name)
             makeblastdb_output = subprocess.run(str(cmd), capture_output=True, shell=True)
             if makeblastdb_output.stderr:
-                if not Path("blast_input.fasta").exists():
-                    raise subprocess.SubprocessError(
-                        "Makeblastdb returned error. Input file for Makeblastdb does not exist. Check your input.",
-                        str(cmd))
-                else:
-                    raise subprocess.SubprocessError("Makeblastdb returned error. Check your input.",
-                                                     makeblastdb_output.stderr.decode())
+                raise subprocess.SubprocessError(f"Makeblastdb returned error: {makeblastdb_output.stderr.decode()}")
         except Exception:
             raise
         finally:
@@ -178,12 +172,7 @@ class Database:
 
             # Error only occurs if it's not this stupid warning.
             if blastn_output.stderr and "Examining 5 or more matches" not in blastn_output.stderr.decode():
-                if not Path("blast_query.fasta").exists():
-                    raise subprocess.SubprocessError(
-                        "Blastn returned error. Input file for Blastn does not exist. Check your input.", str(cmd))
-                else:
-                    raise subprocess.SubprocessError("Blastn returned error. Check your input.",
-                                                     blastn_output.stderr.decode())
+                raise subprocess.SubprocessError(f"Blastn returned error: {blastn_output.stderr.decode()}")
         except Exception:
             raise
         finally:

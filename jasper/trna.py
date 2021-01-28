@@ -17,7 +17,6 @@ import subprocess
 from pathlib import Path
 
 import pandas as pd
-from Bio import SeqIO
 from Bio.Blast.Applications import NcbimakeblastdbCommandline, NcbiblastnCommandline
 
 from . import blast
@@ -64,9 +63,6 @@ class tRNAScanner:
 
             with open(aggregate, 'a+') as aggregate_fh:
                 aggregate_fh.write(blast.Database.repair_fasta(source_file))
-            print(f"Performed {i} files aggregation for tRNA-scan", end='\r')
-
-        print("\nRunning tRNAscan-SE")
         out_file = Path(output_filename)
         trna_output = self.run_trnascan(aggregate, out_file, threads)
         aggregate.unlink()
@@ -84,7 +80,6 @@ class tRNAScanner:
         res = subprocess.run(['tRNAscan-SE', str(file), '--fasta', str(out_file), '--thread', str(num_threads)],
                              capture_output=True)
         return res
-
 
     def create(self, input_file: Path):
         """Function for making local blast database.
@@ -109,13 +104,7 @@ class tRNAScanner:
             cmd()
             makeblastdb_output = subprocess.run(str(cmd), capture_output=True, shell=True)
             if makeblastdb_output.stderr:
-                if not input_file.exists():
-                    raise subprocess.SubprocessError(
-                        "Makeblastdb returned error. Input file for Makeblastdb does not exist. Check your input.",
-                        str(cmd))
-                else:
-                    raise subprocess.SubprocessError("Makeblastdb returned error. Check your input.",
-                                                     makeblastdb_output.stderr.decode())
+                raise subprocess.SubprocessError(f"Makeblastdb returned error: {makeblastdb_output.stderr.decode()}")
         except Exception:
             raise
         finally:
@@ -160,12 +149,7 @@ class tRNAScanner:
 
             # Error only occurs if it's not this stupid warning.
             if blast_output.stderr and "Examining 5 or more matches" not in blast_output.stderr.decode():
-                if not Path("blast_query.fasta").exists():
-                    raise subprocess.SubprocessError(
-                        "Blastn returned error. Input file for Blastn does not exist. Check your input.", str(cmd))
-                else:
-                    raise subprocess.SubprocessError("Blastn returned error. Check your input.",
-                                                     blast_output.stderr.decode())
+                raise subprocess.SubprocessError(f"Blastn returned error: {blast_output.stderr.decode()}")
         except Exception:
             raise
         finally:
@@ -197,7 +181,8 @@ def main(args):
 
     print("Quering a phage trnas")
     match_reward = 2 if not args.blastn_config.get('reward') else args.blastn_config.get('reward')
-    results_df = t.query(vir, {"task": "blastn-short"}, blast_format="10 qseqid sseqid score length", headers=("Virus", "Host", "Score", "Alen"))
+    results_df = t.query(vir, {"task": "blastn-short"}, blast_format="10 qseqid sseqid score length",
+                         headers=("Virus", "Host", "Score", "Alen"))
     print("Done")
 
     results_df['Score'] /= results_df['Alen'] * match_reward
