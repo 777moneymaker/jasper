@@ -53,7 +53,7 @@ class MashTests(unittest.TestCase):
         df["Query"] = df["Query"].map(lambda x: x.split("/")[-1].split(".")[0])
         df["Target"] = df["Target"].map(lambda x: x.split("/")[-1].split(".")[0])
         df.drop(columns=["hashes"], inplace=True)
-
+        outfile.unlink()
         self.assertTrue(df.equals(pd.DataFrame(
             {
                 "Query": ["NC_000117|1"],
