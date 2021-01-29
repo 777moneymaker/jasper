@@ -11,7 +11,7 @@
 
 JASPER is a free bioinformatics tools for predicting virus hosts. 
 JASPER uses a bunch of bioinformatics tools to prediction virus hosts. It includes genome-genome alignment, CRISPR spacers analyzation, tRNA analyzation and more.
-JASPER contains few, independent modules `blast`, `crispr`, `trna`, `afree`, `merge`.
+JASPER contains few, independent modules `blast`, `crispr`, `trna`, `wish`, `mash`, `merge`.
 
 # Requirements
 
@@ -43,6 +43,7 @@ Jasper uses input files that ends with `[fa, fna, fasta]` only!
 NCBI-Blast+
 PILER-CR
 WIsH
+Mash
 tRNAscan-SE
 ```
 # Installation
@@ -56,12 +57,14 @@ On Ubuntu:
 * To install PILER-CR go [here](http://www.drive5.com/pilercr/), download compiled software, move somewhere and add to `$PATH` under name `pilercr`.
 * To install tRNAscan-SE go [here](http://lowelab.ucsc.edu/tRNAscan-SE/), download, compile, move somewhere and add to `$PATH` under name `tRNAscan-SE`. Remember that tRNAscan-SE needs Infernal to work properly.
 * To install WIsH go [here](https://github.com/soedinglab/WIsH), download, compile, move somewhere and add to `$PATH` under name `WIsH`.
+* To install Mash go [here](https://github.com/marbl/Mash), download release, move somewhere and add to `$PATH` under name `mash`.
 
 Source code for additional software:
 * NCBI-Blast+: [here](https://www.ncbi.nlm.nih.gov/books/NBK279671/)
 * PILER-CR [here](http://www.drive5.com/pilercr/)
 * tRNAscan-SE [here](http://lowelab.ucsc.edu/tRNAscan-SE/)
 * WIsH [here](https://github.com/soedinglab/WIsH)
+* Mash [here](https://github.com/marbl/Mash)
 
 **Remember to install everything and add it to path**
 
@@ -92,14 +95,15 @@ JASPER uses bunch of arguments. A lot of parameters are BLAST parameters and can
 
 ### Basic usage
 ```
-jasper-vh blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir
-jasper-vh crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir
-jasper-vh trna --host path/to/host/dir --virus /path/to/vir/dir
-jasper-vh afree --host path/to/host/dir --virus /path/to/vir/dir 
-jasper-vh merge results1.csv results2.csv results3.csv [-w --weigths] 0.6 0.2 0.2 --output final_results.csv 
+jasper-vh blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir --clear
+jasper-vh crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir --clear
+jasper-vh trna --host path/to/host/dir --virus /path/to/vir/dir --clear
+jasper-vh wish --host path/to/host/dir --virus /path/to/vir/dir --clear
+jasper-vh mash --host path/to/host/dir --virus /path/to/vir/dir --clear
+jasper-vh merge *.csv --output final_results.csv 
 ```
 
-For more check `--help` on jasper individual modules: `jasper-vh  {blast,crispr,trna,afree,merge} --help`
+For more check `--help` on jasper individual modules: `jasper-vh  {blast,crispr,trna,wish,mash,merge} --help`
 
 # Blast config
 
@@ -113,7 +117,8 @@ Every module uses different task so there are few arguments that are forbidden:
 ------------
 * Edgar, R.C. (2007) [*PILER-CR: fast and accurate identification of CRISPR repeats*](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18
 * Fichant and Burks, J. Mol. Biol. (1991) *Identification of tRNA genes in genomic DNA*, 220:659-671.
-* Clovis Galiez, Matthias Siebert et al. *"WIsH: who is the host? Predicting prokaryotichosts from metagenomic phage contigs*
+* Clovis Galiez, Matthias Siebert et al. *WIsH: who is the host? Predicting prokaryotichosts from metagenomic phage contigs*
+* Ondov, B.D., Treangen, T.J., Melsted, P. et al. [*Mash: fast genome and metagenome distance estimation using MinHash.*](https://doi.org/10.1186/s13059-016-0997-x) Genome Biol 17, 132 (2016).
 * [NCBI-BLAST+](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
 
 # License
