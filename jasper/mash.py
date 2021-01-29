@@ -122,7 +122,7 @@ def main(args):
     df = df.drop(columns=["P-value", "Hashes"])
     # df = df.groupby(["Virus"]).apply(lambda grp: grp[grp["Distance"] == grp["Distance"].min()]).reset_index(drop=True)
     df = df.groupby(["Virus", "Host"]).sum().reset_index()
-    df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=True).astype(int)
+    df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=False).astype(int)
     df.to_csv(outfile, index=False)
 
     print("Mash results: \n", df)

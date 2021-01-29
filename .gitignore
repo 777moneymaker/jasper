@@ -97,3 +97,5 @@ jasper_vh.egg-info/
 afree_model_dir/
 *.csv
 analysis.sh
+hosts_trnas.fasta
+trna_aggregate.fasta
