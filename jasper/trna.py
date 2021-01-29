@@ -77,7 +77,7 @@ class tRNAScanner:
             out_file (Path): Path to file used as output.
             num_threads (int): Num of threads to run tRNAscan on.
         """
-        res = subprocess.run(['tRNAscan-SE', str(file), '--fasta', str(out_file), '--thread', str(num_threads)],
+        res = subprocess.run(['tRNAscan-SE', str(file), '--fasta', str(out_file), '--thread', str(num_threads), '-b'],
                              capture_output=True)
         return res
 
@@ -180,21 +180,19 @@ def main(args):
     db_output = t.create(host)
 
     print("Quering a phage trnas")
-    match_reward = 2 if not args.blastn_config.get('reward') else args.blastn_config.get('reward')
-    results_df = t.query(vir, {"task": "blastn-short"}, blast_format="10 qseqid sseqid score length",
-                         headers=("Virus", "Host", "Score", "Alen"))
+    results_df = t.query(vir, {"task": "blastn"}, blast_format="10 qseqid sseqid score",
+                         headers=("Virus", "Host", "Score"))
     print("Done")
-
-    results_df['Score'] /= results_df['Alen'] * match_reward
-    results_df = results_df.drop(columns=['Alen'])
 
     results_df['Virus'] = results_df['Virus'].apply(lambda x: x.split('.')[0])
     results_df['Host'] = results_df['Host'].apply(lambda x: x.split('.')[0])
-
+    results_df = results_df.groupby(["Virus", "Host"]).sum().reset_index()
+    results_df["tRNARank"] = results_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     print(results_df)
     results_df.to_csv(args.output_file, index=False)
     print("Saved trnas results")
-    t.clear_files()
+    if args.clear_after:
+        t.clear_files()
 
 
 if __name__ == '__main__':

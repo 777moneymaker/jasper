@@ -166,10 +166,6 @@ def main(args):
             query_df['Alen'] - query_df['Mis'] - query_df['Gap'])
     query_df['Allowed'] = query_df['Allowed'].apply(pd.to_numeric)
 
-    # Normalization
-    match_reward = 1 if not args.short_config.get('reward') else args.short_config.get('reward')
-    query_df['Score'] = query_df['Score'] / (query_df['Alen'] * match_reward)
-
     short_results = query_df.drop(columns=['Qlen', 'Alen', 'Mis', 'Gap'])
     short_results = short_results[short_results['Allowed'] <= args.allowed_mis].drop(columns='Allowed').reset_index(
         drop=True)
@@ -179,13 +175,11 @@ def main(args):
     short_results["Host"] = short_results["Host"].map(lambda x: "|".join(x.split("|")[:2]))
     short_results = short_results.reset_index(drop=True)
 
-    # short_results = short_results.groupby(["Virus", "Spacer"]).sum().reset_index()
-    # idx = short_results.groupby(['Virus'])['Score'].idxmax()
-    # crispr_results: pd.DataFrame = short_results.loc[idx].sort_values('Score', ascending=False).reset_index(drop=True)
+    short_results = short_results.groupby(["Virus", "Host"]).sum().reset_index()
+    short_results["CrisprRank"] = short_results.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
+    short_results.to_csv(args.output_file, index=False)
 
     print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')
-
-    short_results.to_csv(args.output_file, index=False)
     print("Saved files to", args.output_file)
 
 

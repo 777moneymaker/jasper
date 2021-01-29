@@ -153,6 +153,8 @@ def main(args):
     tuplz = df.stack().reset_index().agg(tuple, 1).to_list()
     final_df = pd.DataFrame(tuplz, columns=['Host', 'Virus', 'Score'])
     final_df = final_df.reindex(['Virus', 'Host', 'Score'], axis=1)
+    final_df = final_df.groupby(["Virus", 'Host']).apply(lambda grp: grp.nlargest(1, "Score", keep='all')).reset_index(drop=True)
+    final_df["WishRank"] = final_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     final_df.to_csv(Path(args.results_file), index=False)
     print("Done.")
     print(final_df)

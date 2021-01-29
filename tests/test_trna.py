@@ -68,9 +68,9 @@ class tRNATests(unittest.TestCase):
         host = t.scan(t.source_dir, output_filename="test_host_trnas.fasta")
         phage = t.scan(t.target_dir, output_filename="test_phage_trnas.fasta")
         t.create(host)
-        res = t.query(phage, {"task": "blastn-short"}, blast_format="10 qseqid sseqid score",
+        res = t.query(phage, {"task": "blastn"}, blast_format="10 qseqid sseqid score",
                       headers=("Virus", "Host", "Score"))
-        self.assertTrue(len(res) == 157)
+        self.assertTrue(len(res) == 23)
         t.clear_files()
 
 

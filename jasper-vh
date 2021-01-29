@@ -114,20 +114,12 @@ def parse_args():
                                     description="JASPER is a program for prediction of virus's host. "
                                                 "This module is merging results from individual modules "
                                                 "and producing final output.",
-                                    usage="usage: jasper-vh merge [-h] [--weights WEIGHTS [WEIGHTS ...]] "
-                                          "[--output OUTPUT] files [files ...]",
+                                    usage="usage: jasper-vh merge [-h] files [files ...] [--output OUTPUT]",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker")
     parser_m.add_argument('files',
                           nargs='+',
                           type=str,
-                          help="Files to be merged")
-    parser_m.add_argument('--weights',
-                          required=False,
-                          nargs='+',
-                          type=float,
-                          default=[.6, .4, .4],
-                          dest="weights",
                           help="Files to be merged")
     parser_m.add_argument('--output',
                           required=False,
@@ -135,46 +127,6 @@ def parse_args():
                           default="merged_jasper_results.csv",
                           dest="output",
                           help="Files to be merged")
-
-    # afree parser
-    parser_a = subparser.add_parser(name='afree',
-                                    description="JASPER is a program for prediction of virus's host. This module is "
-                                                "performing alignment-free analysis.",
-                                    epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
-                                           "Check my github: github.com/777moneymaker")
-    parser_a._optionals.title = "arguments"
-    parser_a.add_argument("--host",
-                          type=str,
-                          required=False,
-                          dest='host_dir',
-                          help='directory containing host seq files.')
-    parser_a.add_argument("--virus",
-                          type=str,
-                          required=True,
-                          dest='virus_dir',
-                          help='directory containing virus seq files.')
-    parser_a.add_argument("--output",
-                          type=str,
-                          required=False,
-                          default="afree_results.csv",
-                          dest='results_file',
-                          help='directory for results files.')
-    parser_a.add_argument("--num-threads",
-                          type=int,
-                          required=False,
-                          default=os.cpu_count(),
-                          dest='threads',
-                          help='number of threads')
-    parser_a.add_argument("--use-model",
-                          required=False,
-                          type=str,
-                          dest='model_dir',
-                          help='pre-computed model. ')
-    parser_a.add_argument("--clear-after",
-                          required=False,
-                          action="store_true",
-                          dest='clear_after',
-                          help='if model directory should be deleted. Can be re-used')
 
     # Trna parser
     parser_t = subparser.add_parser(name='trna',
@@ -210,6 +162,86 @@ def parse_args():
                           default=1,
                           dest="num_threads",
                           help="Num of threads to use")
+    parser_t.add_argument("--clear",
+                          required=False,
+                          action="store_true",
+                          dest='clear_after',
+                          help='Specifies if the database files should be deleted after analysis.')
+
+    # wish parser
+    parser_w = subparser.add_parser(name='wish',
+                                    description="JASPER is a program for prediction of virus's host. This module is "
+                                                "performing alignment-free analysis.",
+                                    epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
+                                           "Check my github: github.com/777moneymaker")
+    parser_w._optionals.title = "arguments"
+    parser_w.add_argument("--host",
+                          type=str,
+                          required=False,
+                          dest='host_dir',
+                          help='directory containing host seq files.')
+    parser_w.add_argument("--virus",
+                          type=str,
+                          required=True,
+                          dest='virus_dir',
+                          help='directory containing virus seq files.')
+    parser_w.add_argument("--output",
+                          type=str,
+                          required=False,
+                          default="wish_results.csv",
+                          dest='results_file',
+                          help='directory for results files.')
+    parser_w.add_argument("--num-threads",
+                          type=int,
+                          required=False,
+                          default=os.cpu_count(),
+                          dest='threads',
+                          help='number of threads')
+    parser_w.add_argument("--use-model",
+                          required=False,
+                          type=str,
+                          dest='model_dir',
+                          help='pre-computed model. ')
+    parser_w.add_argument("--clear",
+                          required=False,
+                          action="store_true",
+                          dest='clear_after',
+                          help='if model directory should be deleted. Can be re-used')
+
+    # mash parser
+    parser_msh = subparser.add_parser(name='mash',
+                                      description="JASPER is a program for prediction of virus's host. This module is "
+                                                  "performing alignment-free analysis.",
+                                      epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
+                                             "Check my github: github.com/777moneymaker")
+    parser_msh._optionals.title = "arguments"
+    parser_msh.add_argument("--host",
+                            type=str,
+                            required=False,
+                            dest='host_dir',
+                            help='directory containing host seq files.')
+    parser_msh.add_argument("--virus",
+                            type=str,
+                            required=True,
+                            dest='virus_dir',
+                            help='directory containing virus seq files.')
+    parser_msh.add_argument("--output",
+                            type=str,
+                            required=False,
+                            default="mash_results.csv",
+                            dest='results_file',
+                            help='directory for results files.')
+    parser_msh.add_argument("--num-threads",
+                            type=int,
+                            required=False,
+                            default=os.cpu_count(),
+                            dest='threads',
+                            help='number of threads')
+    parser_msh.add_argument("--clear",
+                            required=False,
+                            action="store_true",
+                            dest='clear_after',
+                            help='if sketch files should be deleted. Can be re-used')
 
     args = parser.parse_args()
     if args.subparser_name == 'blast':
@@ -224,7 +256,7 @@ def parse_args():
         if not args.use_db_name and not all([args.create_db_name, args.virus_dir]):
             parser.error("You must specify database name and a virus files directory. Check usage.")
 
-    if args.subparser_name == 'afree':
+    if args.subparser_name == 'wish':
         if args.host_dir and args.model_dir:
             parser.error("You can't specify host dir for model creation if model is present.")
         if not any([args.host_dir, args.model_dir]):
@@ -251,11 +283,15 @@ if __name__ == '__main__':
         from jasper import merge
 
         merge.main(args)
-    elif subparser_name == 'afree':
-        from jasper import afree
+    elif subparser_name == 'wish':
+        from jasper import wish
 
-        afree.main(args)
+        wish.main(args)
     elif subparser_name == 'trna':
         from jasper import trna
 
         trna.main(args)
+    elif subparser_name == 'mash':
+        from jasper import mash
+
+        mash.main(args)
