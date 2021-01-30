@@ -63,8 +63,10 @@ class Mash:
         host_repaired_folder = Path("host_repaired_mash")
         phage_repaired_folder = Path("phage_repaired_mash")
 
-        host_repaired_folder.mkdir()
-        phage_repaired_folder.mkdir()
+        if not host_repaired_folder.exists():
+            host_repaired_folder.mkdir()
+        if not phage_repaired_folder.exists():
+            phage_repaired_folder.mkdir()
 
         for i, host_file in enumerate(self.host_dir.iterdir(), 1):
             repaired = blast.Database.repair_fasta(host_file)
@@ -145,7 +147,8 @@ def main(args):
     df = df.drop(columns=["P-value", "Hashes"])
     # df = df.groupby(["Virus"]).apply(lambda grp: grp[grp["Distance"] == grp["Distance"].min()]).reset_index(drop=True)
     df = df.groupby(["Virus", "Host"]).sum().reset_index()
-    df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=False).astype(int)
+    df = df[df["Distance"] < 1]
+    df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=True).astype(int)
     df.to_csv(outfile, index=False)
 
     print("Mash results: \n", df)
