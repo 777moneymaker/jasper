@@ -5,7 +5,7 @@ with open("README.md") as fh:
     description = fh.read()
 
 setup(
-    name='jasper_vh',
+    name='jasper-vh',
     version='1.1-beta',
     description="Just a simple virus's hosts predictor",
     long_description=description,
