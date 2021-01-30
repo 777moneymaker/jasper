@@ -24,6 +24,6 @@ def main(args):
     concat.fillna({c: np.inf for c in concat.columns.to_list()[2:]}, inplace=True)
 
     concat = concat.sort_values(by=concat.columns.to_list()[2:]).reset_index(drop=True)
-    concat.to_csv(args.output)
+    concat.to_csv(args.output, index=False)
     print(concat)
     print('Saved final results to', args.output)
