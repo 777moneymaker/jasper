@@ -107,24 +107,28 @@ class Wish:
         if not temp_input_dir.exists():
             temp_input_dir.mkdir()
 
-        for i, phage_file in enumerate(self.phage_dir.iterdir(), 1):
+        res = pd.DataFrame({'Host': [], 'Virus': [], 'Score': []})
+        for phage_file in self.phage_dir.iterdir():
             repaired = blast.Database.repair_fasta(phage_file)
             for record in SeqIO.parse(io.StringIO(repaired), 'fasta'):
-                with open(temp_input_dir / Path(f"{record.id}.fasta"), 'w+') as fh:
+                xtracted = temp_input_dir / Path(f"{record.id}.fasta")
+                with open(xtracted, 'w+') as fh:
                     SeqIO.write(record, fh, 'fasta')
-
-        output = subprocess.run(
-            ['WIsH', '-c', 'predict', '-g', str(temp_input_dir), '-m', str(model_dir), '-r', str(output_dir), '-b',
-             '-t', str(threads)],
-            capture_output=True)
+                output = subprocess.run(
+                    ['WIsH', '-c', 'predict', '-g', str(temp_input_dir), '-m', str(model_dir), '-r',
+                     str(output_dir),
+                     '-b',
+                     '-t', str(threads)], capture_output=True)
+                if output.stderr.decode():
+                    raise subprocess.SubprocessError(output.stderr.decode())
+                xtracted.unlink()
+                df = pd.read_csv(output_dir / Path("llikelihood.matrix"),
+                                 sep='\t', index_col=0)
+                tuplz = df.stack().reset_index().agg(tuple, 1).to_list()
+                df = pd.DataFrame(tuplz, columns=['Host', 'Virus', 'Score'])
+                res = pd.concat([res, df])
         shutil.rmtree(temp_input_dir)
-
-        if output.stderr.decode():
-            raise subprocess.SubprocessError(output.stderr.decode())
-
-        df = pd.read_csv(output_dir / Path("llikelihood.matrix"),
-                         sep=None, engine='python', index_col=0)
-        return df
+        return res
 
 
 def main(args):
@@ -150,14 +154,16 @@ def main(args):
         df = w.predict(threads=args.threads)
     shutil.rmtree(Path("afree_output_dir"))
 
-    tuplz = df.stack().reset_index().agg(tuple, 1).to_list()
-    final_df = pd.DataFrame(tuplz, columns=['Host', 'Virus', 'Score'])
-    final_df = final_df.reindex(['Virus', 'Host', 'Score'], axis=1)
-    final_df = final_df.groupby(["Virus", 'Host']).apply(lambda grp: grp.nlargest(1, "Score", keep='all')).reset_index(drop=True)
-    final_df["WishRank"] = final_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
-    final_df.to_csv(Path(args.results_file), index=False)
+    df = df.reindex(['Virus', 'Host', 'Score'], axis=1)
+    # print("Groupby")
+    # final_df = df.groupby(["Virus", 'Host'], observed=True).apply(lambda grp: grp.nlargest(1, "Score", keep='all')).reset_index(
+    #     drop=True)
+
+    df["WishRank"] = df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
+    df.to_csv(Path(args.results_file), index=False)
     print("Done.")
-    print(final_df)
+    print(df.sort_values(by=['WishRank']).reset_index(drop=True))
+    print(len(set(df['WishRank'])))
 
     if args.clear_after:
         shutil.rmtree(Path("afree_model_dir"))

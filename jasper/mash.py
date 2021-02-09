@@ -145,12 +145,14 @@ def main(args):
     df["Virus"] = df["Virus"].map(lambda x: x.split("/")[-1].split(".")[0])
     df = df.reindex(['Virus', 'Host', 'Distance', 'P-value', 'Hashes'], axis=1)
     df = df.drop(columns=["P-value", "Hashes"])
+
     # df = df.groupby(["Virus"]).apply(lambda grp: grp[grp["Distance"] == grp["Distance"].min()]).reset_index(drop=True)
-    df = df.groupby(["Virus", "Host"]).sum().reset_index()
+    # df = df.groupby(["Virus", "Host"]).sum().reset_index()
+
     df = df[df["Distance"] < 1]
     df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=True).astype(int)
     df.to_csv(outfile, index=False)
-
+    #
     print("Mash results: \n", df)
     print(f"Saved mash results to {str(outfile)}")
 

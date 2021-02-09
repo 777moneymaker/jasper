@@ -5,6 +5,7 @@ function fail {
     exit "${2-1}"  ## Return a code specified by $2 or 1 by default.
 }
 
+
 # Check for sudo
 if [ "$EUID" -ne 0 ]
   then echo "JASPER-FAIL: Please run as root"
