@@ -216,8 +216,11 @@ def main(args):
         db.clear_files()
 
     query_df['Score'] = query_df['Score'].map(pd.to_numeric)
-    query_df = query_df.groupby(["Virus", "Host"]).sum().reset_index()
-    query_df['BlastRank'] = query_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
+    query_df['Virus'] = query_df['Virus'].map(lambda x: x.split("|")[0])
+    query_df['Host'] = query_df['Host'].map(lambda x: x.split("|")[0])
+
+    # query_df = query_df.groupby(['Virus'], as_index=False).apply(lambda x: x.nlargest(1, columns=['Score'], keep='all'))
+    # query_df['BlastRank'] = query_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     query_df.to_csv(args.output_file, index=False)
 
     print("Blastn results (genome-genome query): ", query_df, sep='\n')

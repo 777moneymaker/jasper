@@ -159,7 +159,10 @@ def main(args):
     # final_df = df.groupby(["Virus", 'Host'], observed=True).apply(lambda grp: grp.nlargest(1, "Score", keep='all')).reset_index(
     #     drop=True)
 
-    df["WishRank"] = df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
+    df['Virus'] = df['Virus'].map(lambda x: x.split("|")[0])
+    df['Host'] = df['Host'].map(lambda x: x.split("|")[0])
+
+    # df["WishRank"] = df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     df.to_csv(Path(args.results_file), index=False)
     print("Done.")
     print(df.sort_values(by=['WishRank']).reset_index(drop=True))

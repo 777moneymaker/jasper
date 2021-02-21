@@ -175,8 +175,13 @@ def main(args):
     short_results["Host"] = short_results["Host"].map(lambda x: "|".join(x.split("|")[:2]))
     short_results = short_results.reset_index(drop=True)
 
-    short_results = short_results.groupby(["Virus", "Host"]).sum().reset_index()
-    short_results["CrisprRank"] = short_results.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
+    query_df['Virus'] = query_df['Virus'].map(lambda x: x.split("|")[0])
+    query_df['Host'] = query_df['Host'].map(lambda x: x.split("|")[0])
+
+    # short_results = short_results.groupby(["Virus", "Host"]).sum().reset_index()
+    # short_results = short_results.groupby(['Virus'], as_index=False).apply(lambda x: x.nlargest(1, columns=['Score'], keep='all'))
+
+    # short_results["CrisprRank"] = short_results.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     short_results.to_csv(args.output_file, index=False)
 
     print("blastn-short results (vir_genome-spacers query): ", short_results, sep='\n')

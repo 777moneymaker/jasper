@@ -41,7 +41,7 @@ def parse_args():
                           required=False,
                           type=str,
                           dest="output_file",
-                          default="blast_results.csv",
+                          default="blast.csv",
                           help="Output file with final results.")
 
     group_b = parser_b.add_argument_group()
@@ -92,7 +92,7 @@ def parse_args():
                           required=False,
                           type=str,
                           dest="output_file",
-                          default="crispr_results.csv",
+                          default="crispr.csv",
                           help="Output file with final results.")
 
     group_c = parser_c.add_argument_group()
@@ -154,7 +154,7 @@ def parse_args():
                           required=False,
                           type=str,
                           dest="output_file",
-                          default="trna_results.csv",
+                          default="trna.csv",
                           help="Output file with final results.")
     parser_t.add_argument('--num-threads',
                           required=False,
@@ -188,7 +188,7 @@ def parse_args():
     parser_w.add_argument("--output",
                           type=str,
                           required=False,
-                          default="wish_results.csv",
+                          default="wish.csv",
                           dest='results_file',
                           help='directory for results files.')
     parser_w.add_argument("--num-threads",
@@ -228,7 +228,7 @@ def parse_args():
     parser_msh.add_argument("--output",
                             type=str,
                             required=False,
-                            default="mash_results.csv",
+                            default="mash.csv",
                             dest='results_file',
                             help='directory for results files.')
     parser_msh.add_argument("--num-threads",

@@ -186,8 +186,15 @@ def main(args):
 
     results_df['Virus'] = results_df['Virus'].apply(lambda x: x.split('.')[0])
     results_df['Host'] = results_df['Host'].apply(lambda x: x.split('.')[0])
-    results_df = results_df.groupby(["Virus", "Host"]).sum().reset_index()
-    results_df["tRNARank"] = results_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
+
+    results_df['Virus'] = results_df['Virus'].map(lambda x: x.split("|")[0])
+    results_df['Host'] = results_df['Host'].map(lambda x: x.split("|")[0])
+
+    # results_df = results_df.groupby(["Virus", "Host"]).sum().reset_index()
+
+    # results_df = results_df.groupby(['Virus'], as_index=False).apply(lambda x: x.nlargest(1, columns=['Score'], keep='all'))
+
+    # results_df["tRNARank"] = results_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     print(results_df)
     results_df.to_csv(args.output_file, index=False)
     print("Saved trnas results")

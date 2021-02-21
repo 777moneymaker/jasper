@@ -150,7 +150,12 @@ def main(args):
     # df = df.groupby(["Virus", "Host"]).sum().reset_index()
 
     df = df[df["Distance"] < 1]
-    df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=True).astype(int)
+
+    df['Virus'] = df['Virus'].map(lambda x: x.split("|")[0])
+    df['Host'] = df['Host'].map(lambda x: x.split("|")[0])
+
+    # df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=True).astype(int)
+    df.rename(columns={'Distance': 'Score'}, inplace=True)
     df.to_csv(outfile, index=False)
     #
     print("Mash results: \n", df)
