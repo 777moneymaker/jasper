@@ -218,6 +218,7 @@ def main(args):
     query_df['Score'] = query_df['Score'].map(pd.to_numeric)
     query_df['Virus'] = query_df['Virus'].map(lambda x: x.split("|")[0])
     query_df['Host'] = query_df['Host'].map(lambda x: x.split("|")[0])
+    query_df = query_df.groupby(['Virus', 'Host'], observed=True).max().reset_index()
 
     # query_df = query_df.groupby(['Virus'], as_index=False).apply(lambda x: x.nlargest(1, columns=['Score'], keep='all'))
     # query_df['BlastRank'] = query_df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)

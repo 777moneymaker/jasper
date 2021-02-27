@@ -29,10 +29,12 @@ def main(args):
         frames.append(frame)
 
     ranked = rank_frames(frames)
+
+    # print(ranked)
     # ranked.to_csv()
     # print(*ranked, sep='\n')
 
-    frames = [frame.groupby(['Virus']).apply(lambda x: x.nlargest(1, ['Score'], keep='all')).reset_index(drop=True) for frame in frames]
+    frames = [frame.groupby(['Virus']).apply(lambda x: x.nlargest(1, ['Score'], keep='all')).reset_index(drop=True) for frame in ranked]
     concat = reduce(lambda left, right: pd.merge(left, right, on=['Virus', 'Host'], how='outer', copy=False), frames)
     concat[concat.columns.to_list()[2:]].apply(pd.to_numeric)
 
@@ -41,31 +43,35 @@ def main(args):
     # concat.dropna(axis=1, inplace=True, how='all')
     concat.fillna({c: np.inf for c in concat.columns.to_list()[2:]}, inplace=True)
 
-    ### QUANTS ###
-    def perc_groups(grp):
-        x = grp.copy()
-        for col in grp.columns.to_list()[2:]:
-            if all(x == np.inf for x in grp[col]):
-                x[col] = np.ones(len(x[col]))
-            else:
-                a = grp[col].to_numpy()
-                x[col] = (a[:, None] < a).sum(axis=0) / len(a)
-        return x
-    ##############
-    quants = concat.groupby(['Virus'], group_keys=False, as_index=False).apply(perc_groups)
+    print(concat)
 
-    ### MAGIC HERE ###
-    cols_of_interest = concat.columns.to_list()[2:]
-
-    def get_all_min(sdf):
-        sdf_min = sdf.min().to_frame().T
-        result = pd.concat([pd.merge(sdf, sdf_min[[c]], how='inner') for c in sdf_min.columns if c in cols_of_interest])
-        result = result.drop_duplicates().reset_index(drop=True)
-        return result
-
-    filtered = concat.groupby('Virus', as_index=False).apply(get_all_min)
-    # print(filtered)
-    ##################
+    # ### QUANTS ###
+    # def perc_groups(grp):
+    #     x = grp.copy()
+    #     for col in grp.columns.to_list()[2:]:
+    #         a = grp[col].to_numpy()
+    #         cl = (a[:, None] < a).sum(axis=0) / len(a)
+    #         for i in range(len(a)):
+    #             if a[i] == np.inf:
+    #                 cl[i] = 1
+    #         x[col] = cl
+    #     return x
+    # quants = concat.groupby(['Virus'], group_keys=False, as_index=False).apply(perc_groups)
+    # print(quants)
+    # ##############
+    #
+    # ### MAGIC HERE ###
+    # cols_of_interest = concat.columns.to_list()[2:]
+    #
+    # def get_all_min(sdf):
+    #     sdf_min = sdf.min().to_frame().T
+    #     result = pd.concat([pd.merge(sdf, sdf_min[[c]], how='inner') for c in sdf_min.columns if c in cols_of_interest])
+    #     result = result.drop_duplicates().reset_index(drop=True)
+    #     return result
+    #
+    # filtered = concat.groupby('Virus', as_index=False).apply(get_all_min)
+    # # print(filtered)
+    # ##################
 
 
     # Sorting

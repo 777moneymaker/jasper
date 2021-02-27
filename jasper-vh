@@ -17,11 +17,12 @@ def parse_args():
     # Blast parser
     parser_b = subparser.add_parser(name='blast',
                                     description="JASPER is a program for prediction of virus's host. This module is "
-                                                "performing genome-genome blast query with given data and config.",
+                                                "performing genome-genome blast query with given data and config."
+                                                "WARNING: For different number of threads for BLAST, please pass the blast file",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper-vh blast [-h] --virus VIRUS_DIR [--config BLASTN_CONFIG] --use-db "
-                                          "USE_DB_NAME |  (--create-db CREATE_DB_NAME --host HOST_DIR)")
+                                    usage="jasper-vh blast [-h] --virus VIRUS_DIR [--config BLASTN_CONFIG_JSON] (--use-db "
+                                          "DB_NAME) |  (--create-db DB_NAME --host HOST_DIR) [--clear] [--output FILE]")
     parser_b._optionals.title = "arguments"
     parser_b.add_argument("--virus",
                           required=True,
@@ -62,11 +63,13 @@ def parse_args():
     parser_c = subparser.add_parser(name='crispr',
                                     description="JASPER is a program for prediction of virus's host. This module is "
                                                 "performing crispr spacers analysis which is "
-                                                "vir_genome-spacer blast query with given data and config.",
+                                                "vir_genome-spacer blast query with given data and config."
+                                                "WARNING: For different number of threads for BLAST, please pass the config file",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper-vh crispr [-h] -host HOST_DIR [--config BLASTN_CONFIG] --use-db "
-                                          "USE_DB_NAME |  (--create-db CREATE_DB_NAME --virus VIRUS_DIR)")
+                                    usage="jasper-vh crispr [-h] -host HOST_DIR [--config BLASTN_CONFIG_JSON] (--use-db "
+                                          "USE_DB_NAME) |  (--create-db CREATE_DB_NAME --virus VIRUS_DIR) [--max-mismatches NUMBER_MISMATCHES]"
+                                          "[--clear] [--output FILE]")
     parser_c._optionals.title = "arguments"
     parser_c.add_argument("--host",
                           type=str,
@@ -114,7 +117,7 @@ def parse_args():
                                     description="JASPER is a program for prediction of virus's host. "
                                                 "This module is merging results from individual modules "
                                                 "and producing final output.",
-                                    usage="usage: jasper-vh merge [-h] files [files ...] [--output OUTPUT]",
+                                    usage="usage: jasper-vh merge [-h] files [files ...] [--output FILE]",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker")
     parser_m.add_argument('files',
@@ -131,10 +134,12 @@ def parse_args():
     # Trna parser
     parser_t = subparser.add_parser(name='trna',
                                     description="JASPER is a program for prediction of virus's host. This module is "
-                                                "performing tRNA scan and blast query with retrieved tRNAs",
+                                                "performing tRNA scan and blast query with retrieved tRNAs."
+                                                "WARNING: For different number of threads for BLAST, please pass the config file",
                                     epilog="Made by Milosz Chodkowski 2020, PUT Poznan. "
                                            "Check my github: github.com/777moneymaker",
-                                    usage="jasper-vh trna [-h] --virus VIRUS_DIR --host HOST_DIR [--config BLASTN_CONFIG]")
+                                    usage="jasper-vh trna [-h] --virus VIRUS_DIR --host HOST_DIR [--config BLASTN_CONFIG]"
+                                          "[--output FILE] [--num_threads NUM_THREADS] [--clear]")
     parser_t._optionals.title = "arguments"
     parser_t.add_argument("--virus",
                           required=True,
@@ -161,7 +166,7 @@ def parse_args():
                           type=int,
                           default=1,
                           dest="num_threads",
-                          help="Num of threads to use")
+                          help="Num of threads tRNA-scan will use")
     parser_t.add_argument("--clear",
                           required=False,
                           action="store_true",
@@ -236,12 +241,12 @@ def parse_args():
                             required=False,
                             default=os.cpu_count(),
                             dest='threads',
-                            help='number of threads')
+                            help='number of threads.')
     parser_msh.add_argument("--clear",
                             required=False,
                             action="store_true",
                             dest='clear_after',
-                            help='if sketch files should be deleted. Can be re-used')
+                            help='if sketch files should be deleted.')
 
     args = parser.parse_args()
     if args.subparser_name == 'blast':

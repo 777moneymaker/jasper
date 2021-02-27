@@ -157,7 +157,7 @@ def main(args):
     # df["MashRank"] = df.groupby(["Virus"])['Distance'].rank(method='dense', ascending=True).astype(int)
     df.rename(columns={'Distance': 'Score'}, inplace=True)
     df.to_csv(outfile, index=False)
-    #
+
     print("Mash results: \n", df)
     print(f"Saved mash results to {str(outfile)}")
 

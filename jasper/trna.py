@@ -190,7 +190,7 @@ def main(args):
     results_df['Virus'] = results_df['Virus'].map(lambda x: x.split("|")[0])
     results_df['Host'] = results_df['Host'].map(lambda x: x.split("|")[0])
 
-    # results_df = results_df.groupby(["Virus", "Host"]).sum().reset_index()
+    results_df = results_df.groupby(['Virus', 'Host'], observed=True).max().reset_index()
 
     # results_df = results_df.groupby(['Virus'], as_index=False).apply(lambda x: x.nlargest(1, columns=['Score'], keep='all'))
 

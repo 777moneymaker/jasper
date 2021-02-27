@@ -165,8 +165,6 @@ def main(args):
     # df["WishRank"] = df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     df.to_csv(Path(args.results_file), index=False)
     print("Done.")
-    print(df.sort_values(by=['WishRank']).reset_index(drop=True))
-    print(len(set(df['WishRank'])))
 
     if args.clear_after:
         shutil.rmtree(Path("afree_model_dir"))
