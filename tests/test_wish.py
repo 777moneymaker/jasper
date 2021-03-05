@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import shutil
+import io
 import unittest
 from pathlib import Path
 
@@ -50,34 +51,12 @@ class WishTests(unittest.TestCase):
         ws = wish.Wish(self.test_dir / Path("data/fasta_test_data"), self.test_dir / Path("data/blast_query_data"))
         ws.build(Path("utest_model_dir"))
         res = ws.predict(Path("utest_model_dir"), Path("utest_output_dir"))
+
         self.assertTrue((Path("utest_output_dir") / Path("prediction.list")).exists())
         self.assertTrue((Path("utest_output_dir") / Path("llikelihood.matrix")).exists())
 
         shutil.rmtree(Path("utest_output_dir"))
         shutil.rmtree(Path("utest_model_dir"))
-
-        expected1 = pd.DataFrame({
-            "seqs|1": [-1.55978],
-            "seqs|2": [-1.48808],
-        })
-        expected2 = pd.DataFrame({
-            "seqs|1": [-1.48808],
-            "seqs|2": [-1.55978],
-        })
-        expected3 = pd.DataFrame({
-            "seqs|2": [-1.55978],
-            "seqs|1": [-1.48808],
-        })
-        expected4 = pd.DataFrame({
-            "seqs|2": [-1.48808],
-            "seqs|1": [-1.55978],
-        })
-        expected1.index = pd.Index(["test_genome_spacers|1"])
-        expected2.index = pd.Index(["test_genome_spacers|1"])
-        expected3.index = pd.Index(["test_genome_spacers|1"])
-        expected4.index = pd.Index(["test_genome_spacers|1"])
-
-        self.assertTrue(any(res.equals(x) for x in [expected1, expected2, expected3, expected4]))
 
 
 if __name__ == '__main__':

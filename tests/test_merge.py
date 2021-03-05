@@ -31,18 +31,17 @@ class MergeTests(unittest.TestCase):
     def test_merge_ok(self):
         args = Expando()
         args.files = [self.test_dir / Path('data/test_df_merge1.csv'), self.test_dir / Path('data/test_df_merge2.csv')]
-        args.output = "merged_jasper_results.csv"
+        args.output = "test_jasper_results.csv"
 
         with HiddenPrints():
             merge.main(args)
 
-        self.assertTrue(Path("merged_jasper_results.csv").exists())
+        self.assertTrue(Path("test_jasper_results.csv").exists())
         res = pd.read_csv(args.output)
+        self.assertTrue(len(res) == 9)
 
-        self.assertTrue(len(res) == 3)
-
-        if Path("merged_jasper_results.csv").exists():
-            Path("merged_jasper_results.csv").unlink()
+        if Path("test_jasper_results.csv").exists():
+            Path("test_jasper_results.csv").unlink()
 
 
 if __name__ == "__main__":
