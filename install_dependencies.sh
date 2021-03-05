@@ -13,7 +13,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # autoconf for make
-sudo apt install -y cmake autoconf || fail "Unable to download and install cmake or autoconf"
+sudo apt install -y cmake autoconf g++ || fail "Unable to download and install cmake or autoconf"
 
 # NCBI-Blast+ package
 apt install -y ncbi-blast+ || fail "Unable to install NCBI-Blast+ or tRNAscan-se"
