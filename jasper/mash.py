@@ -150,6 +150,7 @@ def main(args):
     # df = df.groupby(["Virus", "Host"]).sum().reset_index()
 
     df = df[df["Distance"] < 1]
+    df["Distance"] = 1 - df["Distance"]
 
     df['Virus'] = df['Virus'].map(lambda x: x.split("|")[0])
     df['Host'] = df['Host'].map(lambda x: x.split("|")[0])
