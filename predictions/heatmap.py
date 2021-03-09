@@ -28,19 +28,15 @@ def main():
         f = frame.drop(columns=['Score'])
         f.name = frame.name
         ranked_fixed.append(f)
-    #print(*ranked_fixed, sep='\n')
 
-
-    with open('true_positives.json') as fh:
+    with open('../true_positives.json') as fh:
         d = json.load(fh)
-    # print(d)
 
     filtered = []
     for frame in ranked_fixed:
         df = frame.groupby(['Virus'], as_index=False).apply(lambda grp: grp.loc[grp.iloc[:, -1] == grp.iloc[:, -1].min()]).reset_index(drop=True)
         df.name = frame.name
         filtered.append(df)
-    # print(filtered)
 
     counts = {}
     for frame in filtered:

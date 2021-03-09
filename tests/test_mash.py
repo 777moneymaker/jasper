@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import shutil
 import unittest
 from pathlib import Path
 
 import pandas as pd
 
 from jasper import mash
+
 
 class MashTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -45,7 +45,8 @@ class MashTests(unittest.TestCase):
         phage_s.unlink()
 
     def test_mash_predicts(self):
-        ws = mash.Mash(self.test_dir / Path("data/test_trnascan_host"), self.test_dir / Path("data/test_trnascan_phage"))
+        ws = mash.Mash(self.test_dir / Path("data/test_trnascan_host"),
+                       self.test_dir / Path("data/test_trnascan_phage"))
         host_s, phage_s = ws.sketch("test_host_s", "test_phage_s")
         outfile = ws.run_mash(host_s, phage_s, Path("test_outfile.csv"))
         self.assertTrue(outfile.exists())

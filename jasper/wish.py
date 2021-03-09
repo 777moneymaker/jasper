@@ -155,18 +155,13 @@ def main(args):
     shutil.rmtree(Path("afree_output_dir"))
 
     df = df.reindex(['Virus', 'Host', 'Score'], axis=1)
-    # print("Groupby")
-    # final_df = df.groupby(["Virus", 'Host'], observed=True).apply(lambda grp: grp.nlargest(1, "Score", keep='all')).reset_index(
-    #     drop=True)
 
     df['Virus'] = df['Virus'].map(lambda x: x.split("|")[0])
     df['Host'] = df['Host'].map(lambda x: x.split("|")[0])
 
-    # df["WishRank"] = df.groupby(["Virus"])["Score"].rank(method='dense', ascending=False).astype(int)
     df.to_csv(Path(args.results_file), index=False)
     print("Done.")
 
     if args.clear_after:
         shutil.rmtree(Path("afree_model_dir"))
-
     print("Saved results to", args.results_file)

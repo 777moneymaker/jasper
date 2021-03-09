@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 import shutil
-import io
 import unittest
 from pathlib import Path
-
-import pandas as pd
 
 from jasper import wish
 

@@ -21,6 +21,7 @@ from Bio import SeqIO
 from . import blast
 from . import utils
 
+
 class Mash:
     def __init__(self, host_dir: Path, phage_dir: Path):
         """Inits Mash object with 2 directories. One phage directory and one host directory.
@@ -146,9 +147,6 @@ def main(args):
     df = df.reindex(['Virus', 'Host', 'Distance', 'P-value', 'Hashes'], axis=1)
     df = df.drop(columns=["P-value", "Hashes"])
 
-    # df = df.groupby(["Virus"]).apply(lambda grp: grp[grp["Distance"] == grp["Distance"].min()]).reset_index(drop=True)
-    # df = df.groupby(["Virus", "Host"]).sum().reset_index()
-
     df = df[df["Distance"] < 1]
     df["Distance"] = 1 - df["Distance"]
 
@@ -161,7 +159,3 @@ def main(args):
 
     print("Mash results: \n", df)
     print(f"Saved mash results to {str(outfile)}")
-
-
-
-
