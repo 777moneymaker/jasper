@@ -6,7 +6,7 @@ with open("README.md") as fh:
 
 setup(
     name='jasper-vh',
-    version='1.1',
+    version='2.0',
     description="Just a simple virus's hosts predictor",
     long_description=description,
     long_description_content_type='text/markdown',
@@ -25,7 +25,7 @@ setup(
     ],
     scripts=['jasper-vh'],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         'Environment :: Console',
         "Intended Audience :: Education",
         "Intended Audience :: Healthcare Industry",
