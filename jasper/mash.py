@@ -6,7 +6,9 @@ This module uses Biopython and Mash software for virus's host prediction by usin
 More about it:
     1. https://biopython.org/
 
-    2. https://github.com/soedinglab/WIsH
+    2. https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0997-x
+    
+    3. https://github.com/marbl/Mash
 """
 
 import io

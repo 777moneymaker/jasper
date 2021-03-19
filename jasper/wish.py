@@ -6,7 +6,9 @@ This module uses Biopython and WIsH software for virus's host prediction by usin
 More about it:
     1. https://biopython.org/
 
-    2. https://github.com/soedinglab/WIsH
+    2. https://pubmed.ncbi.nlm.nih.gov/28957499/
+
+    3. https://github.com/soedinglab/WIsH
 """
 
 import io

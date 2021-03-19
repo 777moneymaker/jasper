@@ -15,7 +15,7 @@ setup(
     license="GPLv3",
     author_email='milosz.chodkowski@student.put.poznan.pl',
     url="https://github.com/777moneymaker/jasper",
-    download_url="https://github.com/777moneymaker/jasper/archive/v1.0.2.tar.gz",
+    download_url="https://github.com/777moneymaker/jasper/archive/v2.0.tar.gz",
     packages=['jasper'],
     install_requires=[
         "biopython",
