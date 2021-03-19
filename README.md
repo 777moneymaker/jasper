@@ -7,7 +7,7 @@
 
 * JASPER is a free bioinformatics tools for predicting virus hosts.
 * JASPER uses a bunch of bioinformatics tools to prediction virus hosts. It includes genome-genome alignment, CRISPR
-  spacers analyzation, tRNA analyzation and more.
+  spacers analysis, tRNA analysis and more.
 * JASPER contains few, independent modules `blast`, `crispr`, `trna`, `wish`, `mash`, `merge`.
 
 # Requirements
