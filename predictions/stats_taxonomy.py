@@ -68,29 +68,38 @@ def main():
                 df = frame[frame["Virus"] == vir]
                 vir_record = d_vir[vir]
 
-                for hst in df["Host"]:
-                    host_record = d_host[hst]
+                species = set([d_host[hst]["lineage_names"][-1] for hst in df["Host"]])
+                genus = set([d_host[hst]["lineage_names"][-2] for hst in df["Host"]])
+                family = set([d_host[hst]["lineage_names"][-3] for hst in df["Host"]])
+                order = set([d_host[hst]["lineage_names"][-4] for hst in df["Host"]])
+                clas = set([d_host[hst]["lineage_names"][-5] for hst in df["Host"]])
+                phylum = set([d_host[hst]["lineage_names"][-6] for hst in df["Host"]])                
 
-                    species = host_record["lineage_names"][-1] == vir_record["host"]["lineage_names"][-1]
-                    genus = host_record["lineage_names"][-2] == vir_record["host"]["lineage_names"][-2]
-                    family = host_record["lineage_names"][-3] == vir_record["host"]["lineage_names"][-3]
-                    order = host_record["lineage_names"][-4] == vir_record["host"]["lineage_names"][-4]
-                    clas = host_record["lineage_names"][-5] == vir_record["host"]["lineage_names"][-5]
-                    phylum = host_record["lineage_names"][-6] == vir_record["host"]["lineage_names"][-6]
+                counts[frame.name]["species"].append(vir_record["host"]["lineage_names"][-1] in species)
+                counts[frame.name]["genus"].append(vir_record["host"]["lineage_names"][-2] in genus)
+                counts[frame.name]["family"].append(vir_record["host"]["lineage_names"][-3] in family)
+                counts[frame.name]["order"].append(vir_record["host"]["lineage_names"][-4] in order)
+                counts[frame.name]["class"].append(vir_record["host"]["lineage_names"][-5] in clas)
+                counts[frame.name]["phylum"].append(vir_record["host"]["lineage_names"][-6] in phylum)
 
-                    counts[frame.name]["species"].append(species)
-                    counts[frame.name]["genus"].append(genus)
-                    counts[frame.name]["family"].append(family)
-                    counts[frame.name]["order"].append(order)
-                    counts[frame.name]["class"].append(clas)
-                    counts[frame.name]["phylum"].append(phylum)
+                # for hst in df["Host"]:
+                #     host_record = d_host[hst]
+
+                #     species = host_record["lineage_names"][-1] == vir_record["host"]["lineage_names"][-1]
+                #     genus = host_record["lineage_names"][-2] == vir_record["host"]["lineage_names"][-2]
+                #     family = host_record["lineage_names"][-3] == vir_record["host"]["lineage_names"][-3]
+                #     order = host_record["lineage_names"][-4] == vir_record["host"]["lineage_names"][-4]
+                #     clas = host_record["lineage_names"][-5] == vir_record["host"]["lineage_names"][-5]
+                #     phylum = host_record["lineage_names"][-6] == vir_record["host"]["lineage_names"][-6]
+
+
 
     counts = {frame: {tax: sum(counts[frame][tax]) / len(counts[frame][tax]) * 100 for tax in taxonomy} for frame in counts.keys()}
     
     # for k in counts.keys():
     #     for tax in counts[k].keys():
     #         print(k, tax, f"{sum(counts[k][tax]) / len(counts[k][tax]) * 100 :.2f}")
-
+    #         print(len(counts[k][tax]))
 
     # with open("taxonomy_predictions_2.json", "w+") as fh:
     #     json.dump(counts, fh)
