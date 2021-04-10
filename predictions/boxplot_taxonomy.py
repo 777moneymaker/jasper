@@ -18,7 +18,7 @@ def rank_frames(frames):
 def main():
     frames = []
     # ['blast.csv', 'crispr.csv', 'mash.csv', 'wish.csv']
-    for fl in ['blast.csv']:
+    for fl in ['blast.csv', 'crispr.csv', 'mash.csv', 'wish.csv']:
         frame = pd.read_csv(fl)
         frame.name = Path(fl).stem
         frames.append(frame)
@@ -31,11 +31,11 @@ def main():
         f.name = frame.name
         ranked_fixed.append(f)
 
-    # filtered = []
-    # for frame in ranked_fixed:
-    #     df = frame.groupby(['Virus'], as_index=False).apply(lambda grp: grp.loc[grp.iloc[:, -1] == grp.iloc[:, -1].min()]).reset_index(drop=True)
-    #     df.name = frame.name
-    #     filtered.append(df)
+    filtered = []
+    for frame in ranked_fixed:
+        df = frame.groupby(['Virus'], as_index=False).apply(lambda grp: grp.loc[grp.iloc[:, -1] == grp.iloc[:, -1].min()]).reset_index(drop=True)
+        df.name = frame.name
+        filtered.append(df)
 
     with open('true_positives.json') as fh:
         d = json.load(fh)
@@ -64,28 +64,28 @@ def main():
     #                 counts[frame.name].append(list(df["Host"]).index(hst) + 1)
 
     counts = defaultdict(list)
-    for frame in ranked_fixed:
+    for frame in filtered:
         for i, vir in enumerate(d.keys(), 1):
             df = frame[frame["Virus"] == vir]
 
             vir_record = d_vir[vir]
-            vir_host_tax = vir_record["host"]["lineage_ranks"][-2]
+            vir_host_tax = vir_record["host"]["lineage_names"][-1]
 
             #genuses = set([d_host[hst]["lineage_names"][-2] for hst in df["Host"]])
-            for hst in df["Host"]:
+            for hst in list(df["Host"]):
                 hst_record = d_host[hst]
-                hst_tax = hst_record["lineage_names"][-2]
-                
+                hst_tax = hst_record["lineage_names"][-1]
                 if hst_tax == vir_host_tax:
                     counts[frame.name].append(list(df["Host"]).index(hst) + 1)
+                    break
             print(frame.name, i)
 
-    print(counts)
     labels, data = [*zip(*counts.items())]
     labels, data = counts.keys(), counts.values()
     plt.boxplot(data)
+    plt.title("Species")
     plt.xticks(range(1, len(labels) + 1), labels)
-    plt.savefig('boxplot_genus.png', dpi=200)
+    plt.savefig('boxplot_species.png', dpi=200)
 
 if __name__ == '__main__':
     main()

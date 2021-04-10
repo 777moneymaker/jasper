@@ -1,0 +1,7 @@
+ROC Done.
+PR Done.
+F1's:
+blast 0.087
+crispr 0.043
+mash 0.189
+wish 0.015
