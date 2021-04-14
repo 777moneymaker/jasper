@@ -1,0 +1,7 @@
+1. Host pred accur
+2. Rozkład pozycji
+3. krzywe ROC - opisują jak dobrze metoda rozróżnia pos od neg
+4. krzywe PR + (F1, prec, rec, tresh) w tabeli
+5. Heatmapa
+
++ ewentualnie upset plot.
