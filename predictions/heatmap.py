@@ -3,7 +3,7 @@ import json
 from functools import reduce
 from pathlib import Path
 import pandas as pd
-import seaborn as sns
+# import seaborn as sns
 import matplotlib.pyplot as plt
 import itertools
 
@@ -29,7 +29,7 @@ def main():
         f.name = frame.name
         ranked_fixed.append(f)
 
-    with open('../true_positives.json') as fh:
+    with open('./true_positives.json') as fh:
         d = json.load(fh)
 
     filtered = []
@@ -38,18 +38,35 @@ def main():
         df.name = frame.name
         filtered.append(df)
 
-    counts = {}
+    # counts = {}
+    # for frame in filtered:
+    #     counts[frame.name] = {}
+    #     for vir in d.keys():     
+    #         if not vir in frame["Virus"]:
+    #             counts[frame.name][vir] = 0
+
+    #         df = frame[frame["Virus"] == vir]
+    #         if any(hst in d[vir] for hst in df["Host"]):
+    #             counts[frame.name][vir] = 1
+    #         else:
+    #             counts[frame.name][vir] = 0
+
+    upset = {}
     for frame in filtered:
-        counts[frame.name] = {}
+        upset[frame.name] = {}
         for vir in d.keys():     
             if not vir in frame["Virus"]:
-                counts[frame.name][vir] = 0
+                upset[frame.name][vir] = 0
 
             df = frame[frame["Virus"] == vir]
             if any(hst in d[vir] for hst in df["Host"]):
-                counts[frame.name][vir] = 1
+                upset[frame.name][vir] = 1
             else:
-                counts[frame.name][vir] = 0
+                upset[frame.name][vir] = 0
+    df = pd.DataFrame.from_dict(upset).T
+    print(df)
+    df.to_csv("upset.csv")
+    exit(0)
 
     for k in counts:
         counts[k] = dict(sorted(counts[k].items(), key=lambda x: x[0]))
