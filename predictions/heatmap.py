@@ -66,6 +66,7 @@ def main():
     df = pd.DataFrame.from_dict(upset).T
     print(df)
     df.to_csv("upset.csv")
+    print(sum(df["blast"]))
     exit(0)
 
     for k in counts:
