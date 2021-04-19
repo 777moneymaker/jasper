@@ -7,20 +7,25 @@ function fail {
 
 
 # Check for sudo
-if [ "$EUID" -ne 0 ]
-  then echo "JASPER-FAIL: Please run as root"
-  exit
-fi
+# if [ "$EUID" -ne 0 ]
+#   then echo "JASPER-FAIL: Please run as root"
+#   exit
+# fi
 
 # autoconf for make
-sudo apt install -y cmake autoconf g++ || fail "Unable to download and install cmake or autoconf"
+apt install -y cmake autoconf g++ wget git || fail "Unable to download and install cmake or autoconf"
 
 # NCBI-Blast+ package
 apt install -y ncbi-blast+ || fail "Unable to install NCBI-Blast+ or tRNAscan-se"
+# wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/ncbi-blast-2.6.0+-src.tar.gz
+# tar -xvf ncbi-blast-2.6.0+-src.tar.gz 
+# rm ncbi-blast-2.6.0+-src.tar.gz 
+# cd ncbi-blast-2.6.0+-src/c++
+# ./configure --prefix=/usr/local
+# make && make install
+# cd ../..
+# rm -rf ncbi-blast-2.6.0+-src
 echo "JASPER: NCBI-Blast+ installed"
-
-# wget for dependencies
-sudo apt install -y wget
 
 # Infernal download, compile and install
 wget http://eddylab.org/infernal/infernal-1.1.4.tar.gz
@@ -28,8 +33,7 @@ tar -xvf infernal-1.1.4.tar.gz
 rm -rf infernal-1.1.4.tar.gz
 cd infernal-1.1.4/
 ./configure --prefix=/usr/local
-make
-make install
+make && make install
 cd ..
 rm -rf infernal-1.1.4/
 echo "JASPER: Infernal installed"

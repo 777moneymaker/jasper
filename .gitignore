@@ -99,3 +99,6 @@ afree_model_dir/
 analysis.sh
 host_trnas.fasta
 trna_aggregate.fasta
+*.json
+*.tar
+*.tar.gz
