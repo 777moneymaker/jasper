@@ -9,23 +9,20 @@
 * JASPER uses a bunch of bioinformatics tools to prediction virus hosts. It includes genome-genome alignment, CRISPR
   spacers analysis, tRNA analysis and more.
 * JASPER contains few, independent modules `blast`, `crispr`, `trna`, `wish`, `mash`, `merge`.
+* JASPER can be installed with Docker.
 
 # Requirements
-
 ### Python 3.7
-
 You need `Python >= 3.7` to use JASPER.
 
 ### Naming convention
-
 **Jasper** depends on good file naming convention. The best is to use sequence ID as file name, e.x. `NC_008876.fna`.
 Software will use this id to name every temp file that needs to be created and also it will use this ID in results file.
 
 **WARNING** It's not the best idea to use `|` char in your filename and also in sequence header. Just use normal fasta
 naming like `>NC_00876 additional_info more_additional_info`.
 
-If you put multiple contigs in a single file, there is no problem with that. Just be sure that every contig is in its
-right file. **Jasper** repairs every file, by default naming it `<id from filename>|<#contig>` e.x.:
+If you put multiple contigs in a single file, there is no problem with that. **Jasper** repairs every file, by default naming it `<id from filename>|<#contig>` e.x.:
 
 ```
 >NC_000856|1
@@ -39,11 +36,9 @@ So even if you have, for instance, one genome in your file, then **Jasper** will
 to `<id from filename>|1`.
 
 ### Extensions
-
 Jasper uses input files that ends with `[fa, fna, fasta]` only!
 
 ### Additional software
-
 ```
 NCBI-Blast+
 PILER-CR
@@ -53,7 +48,7 @@ tRNAscan-SE
 ```
 
 # Installation
-
+### Setup .py
 **JASPER** uses additional software. It calls every program with `subprocess` so every program that is stated in above
 should be installed and added to `PATH`.
 
@@ -82,8 +77,7 @@ Source code for additional software:
 **You can also download the script:**
 
 ```
-install_dependencies.sh - Linux
-install_dependencies_osx.sh - Mac OS
+install_dependencies.sh
 ```
 
 After that go to JASPER's main directory and:
@@ -93,31 +87,30 @@ python setup.py install
 ```
 
 ### PATH
-
 By defaults some pip on linux drops scripts to `~/.local/bin`. Add it to your `$PATH` at the end.
 `export PATH="$HOME/.local/bin:$PATH"`
 Now you're done, and you can start using `jasper-vh`.
 
-### Installation summary
+### Docker
+You can also install Jasper with Docker by using provided `Dockerfile`. To do it you can do something like `cd jasper && docker build -t jasper:v1 .`
+After that you can run it straight from entrypoint or in interactive mode with shell as main entrypoint -> `docker run -it --entrypoint /bin/bash jasper:v1`.
 
+### Installation summary
 You want to have:
 
 * installed jasper python package using `setuptools` or `pip`.
 * installed each tool and added to `PATH`
 
 # Tests
-
 If you want to test, go to proj directory and type `python -m unittest discover`. It's recommended to do that, since it
 performs tool check (ensures that user has all dependencies and proper python version).
 
 # Usage
-
 JASPER uses a bunch of arguments. A lot of parameters are BLAST parameters and can be configured with JSON file and
 passed to JASPER. It's also recommended using `jasper` in empty directory. This ensures, that none of the user's file
 will be overwritten or damaged. Just do `mkdir jasper_results && cd jasper_results` and you're good to go.
 
 ### Basic usage
-
 ```
 jasper-vh blast --virus path/to/virus/dir --create-db host_db --host /path/to/host/dir --clear
 jasper-vh crispr --host path/to/host/dir --create-db vir_db --host /path/to/vir/dir --clear
@@ -130,7 +123,6 @@ jasper-vh merge {blast,crispr,trna,mash,wish}.csv --output final_results.csv
 For more check `--help` on jasper individual modules: `jasper-vh {blast,crispr,trna,wish,mash,merge} --help`
 
 # Output
-
 `JASPER` produces output in a special format:
 
 The resulting file is a csv file with additional lines that start with `#` (for easy parsing).
@@ -168,13 +160,11 @@ Sample:
 tool for given hosts.
 
 # Blast config
-
 You can provide blast config as a `*.json` file. Every module uses a different task so there are few arguments that are
 forbidden:
 `['query', 'db', 'outfmt', 'max_target_seqs', 'num_alignments']`
 
 # References
-
 * Edgar, R.C. (2007) [*PILER-CR: fast and accurate identification of CRISPR
   repeats*](http://www.ncbi.nlm.nih.gov/pubmed/17239253), BMC Bioinformatics, Jan 20;8:18
 * Fichant and Burks, J. Mol. Biol. (1991) *Identification of tRNA genes in genomic DNA*, 220:659-671.
@@ -185,5 +175,4 @@ forbidden:
 * [NCBI-BLAST+](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
 
 # License
-
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
