@@ -95,6 +95,10 @@ Now you're done, and you can start using `jasper-vh`.
 You can also install Jasper with Docker by using provided `Dockerfile`. To do it you can do something like `cd jasper && docker build -t jasper:v1 .`
 After that you can run it straight from entrypoint or in interactive mode with shell as main entrypoint -> `docker run -it --entrypoint /bin/bash jasper:v1`.
 
+To copy files between container and host use `docker cp` command. Example:
+* copy to container - `docker cp ~/Desktop/some_folder jasper:v1/app`
+* copy from container - `docker cp jasper:v1/app/some_folder ~/Desktop`
+
 ### Installation summary
 You want to have:
 
